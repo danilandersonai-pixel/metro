@@ -34,6 +34,17 @@ export class MenuScene extends Phaser.Scene {
       y += 64;
     }
     createButton(this, cx, y, 'Тестовый бой', () => this.scene.start('BattleScene'));
+
+    // На телефоне — во весь экран по первому касанию (браузер разрешает это только после жеста).
+    if (this.sys.game.device.input.touch && !this.scale.isFullscreen) {
+      this.input.once('pointerup', () => {
+        try {
+          this.scale.startFullscreen();
+        } catch {
+          /* полноэкранный режим недоступен — играем как есть */
+        }
+      });
+    }
   }
 
   private loadSlot(slot: string): void {

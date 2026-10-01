@@ -18,5 +18,8 @@ new Phaser.Game({
     width: 1280,
     height: 720,
   },
+  // Два пальца — для масштабирования карты щипком
+  input: { activePointers: 3 },
+  disableContextMenu: true,
   scene: [BootScene, MenuScene, MapScene, StationScene, BattleScene, QuestDialogScene, DiplomacyScene],
 });

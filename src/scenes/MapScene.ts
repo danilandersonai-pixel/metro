@@ -36,6 +36,8 @@ const TAG_NAMES: Record<StationTag, string> = {
   infested: 'логово мутантов',
 };
 
+const ZOOM_MIN = 0.3;
+const ZOOM_MAX = 2.5;
 const PANEL_X = 960;
 const PANEL_W = 310;
 const STATION_R = 14;
@@ -205,23 +207,43 @@ export class MapScene extends Phaser.Scene {
     if (own) cam.centerOn(own.x + PANEL_W / 2, own.y);
 
     let start: { x: number; y: number; sx: number; sy: number } | null = null;
+    let pinch: { dist: number; zoom: number } | null = null;
+    const p1 = this.input.pointer1;
+    const p2 = this.input.pointer2;
     this.input.on('pointerdown', (p: Phaser.Input.Pointer) => {
+      if (p1.isDown && p2.isDown) {
+        // Второй палец — начинаем масштабирование щипком.
+        pinch = { dist: Phaser.Math.Distance.Between(p1.x, p1.y, p2.x, p2.y), zoom: cam.zoom };
+        start = null;
+        this.dragging = true;
+        return;
+      }
       start = { x: p.x, y: p.y, sx: cam.scrollX, sy: cam.scrollY };
       this.dragging = false;
     });
     this.input.on('pointermove', (p: Phaser.Input.Pointer) => {
+      if (pinch && p1.isDown && p2.isDown) {
+        const d = Phaser.Math.Distance.Between(p1.x, p1.y, p2.x, p2.y);
+        this.setZoom(pinch.zoom * (d / Math.max(1, pinch.dist)));
+        return;
+      }
       if (!start || !p.isDown) return;
       const dx = p.x - start.x;
       const dy = p.y - start.y;
-      if (Math.abs(dx) + Math.abs(dy) > 8) this.dragging = true;
+      if (Math.abs(dx) + Math.abs(dy) > 10) this.dragging = true;
       if (this.dragging) cam.setScroll(start.sx - dx / cam.zoom, start.sy - dy / cam.zoom);
     });
     this.input.on('pointerup', () => {
+      if (!p1.isDown || !p2.isDown) pinch = null;
       start = null;
     });
     this.input.on('wheel', (_p: unknown, _o: unknown, _dx: number, dy: number) => {
-      cam.setZoom(Phaser.Math.Clamp(cam.zoom * (dy > 0 ? 0.9 : 1.1), 0.4, 2.5));
+      this.setZoom(cam.zoom * (dy > 0 ? 0.9 : 1.1));
     });
+  }
+
+  private setZoom(z: number): void {
+    this.cameras.main.setZoom(Phaser.Math.Clamp(z, ZOOM_MIN, ZOOM_MAX));
   }
 
   // -------------------------------------------------------------------------
@@ -246,6 +268,9 @@ export class MapScene extends Phaser.Scene {
     );
     this.addUi(new Button(this, PANEL_X + PANEL_W / 2 + 4, this.scale.height - 36, 'Конец хода', () => this.onEndTurn(), PANEL_W - 10, 48, 20));
     this.addUi(new Button(this, 60, 22, 'Меню', () => this.showGameMenu(), 100, 32, 15));
+    // Кнопки масштаба — для телефонов, где нет колеса мыши
+    this.addUi(new Button(this, PANEL_X - 34, 72, '+', () => this.setZoom(this.cameras.main.zoom * 1.25), 48, 48, 26));
+    this.addUi(new Button(this, PANEL_X - 34, 126, '−', () => this.setZoom(this.cameras.main.zoom / 1.25), 48, 48, 26));
     this.addUi(new Button(this, PANEL_X + PANEL_W / 2 + 4, this.scale.height - 92, 'Дипломатия и торговля', () => this.scene.start('DiplomacyScene'), PANEL_W - 10, 40, 16));
   }
 
@@ -391,7 +416,7 @@ export class MapScene extends Phaser.Scene {
       line('Карта метро', 20, TEXT.accent, true);
       line('Нажмите на свой отряд (цветной квадрат с числом бойцов), затем на подсвеченную соседнюю станцию, чтобы пойти туда.', 14, TEXT.dim);
       line('Нажмите на станцию, чтобы узнать о ней.', 14, TEXT.dim);
-      line('Карту можно двигать мышью и масштабировать колесом.', 14, TEXT.dim);
+      line('Карту можно двигать пальцем или мышью, масштаб — щипком, колесом или кнопками +/−.', 14, TEXT.dim);
       const quests = activeQuests(this.state);
       if (quests.length) {
         y += 6;

@@ -109,7 +109,7 @@ export class StationScene extends Phaser.Scene {
             : 'работает';
       const t = this.add.text(x + 12, cy, `${def.name} ${b.level > 1 ? `ур.${b.level}` : ''} — ${status}`, textStyle(14, b.damaged ? TEXT.bad : TEXT.main));
       this.root.add(t);
-      t.setInteractive().on('pointerover', () => this.infoText.setText(def.description));
+      t.setInteractive().on('pointerover', () => this.infoText.setText(def.description)).on('pointerdown', () => this.infoText.setText(def.description));
       if (b.damaged) {
         const btn = new Button(this, x + COL_W - 60, cy + 9, 'Чинить', () => this.showError(repairBuilding(this.state, st.id, b.typeId, p)), 100, 24, 12);
         btn.on('pointerover', () => this.infoText.setText(`Ремонт: ${formatRes(repairCost(b.typeId))}`));
@@ -135,7 +135,8 @@ export class StationScene extends Phaser.Scene {
       if ((def.requiresTags ?? []).some((tag) => !st.tags.includes(tag))) continue;
       const check = canBuild(this.state, st.id, def.id, p);
       const t = this.add.text(x + 12, cy + 2, def.name, textStyle(14, check.ok ? TEXT.main : TEXT.dim));
-      t.setInteractive().on('pointerover', () => this.infoText.setText(`${def.description} Цена: ${formatRes(check.cost)}, ${def.buildTurns} х.`));
+      const info = `${def.description} Цена: ${formatRes(check.cost)}, ${def.buildTurns} х.${check.reason ? ` — ${check.reason}` : ''}`;
+      t.setInteractive().on('pointerover', () => this.infoText.setText(info)).on('pointerdown', () => this.infoText.setText(info));
       this.root.add(t);
       const btn = new Button(this, x + COL_W - 60, cy + 10, 'Строить', () => this.showError(startConstruction(this.state, st.id, def.id, p)), 100, 24, 12).setEnabled(check.ok);
       btn.on('pointerover', () => this.infoText.setText(`${def.name}: ${formatRes(check.cost)}, ${def.buildTurns} х.${check.reason ? ` — ${check.reason}` : ''}`));
@@ -223,9 +224,8 @@ export class StationScene extends Phaser.Scene {
       const t = getUnitType(typeId);
       const check = canHire(this.state, st.id, typeId, p);
       const label = this.add.text(x + 12, cy + 2, t.name, textStyle(14, check.ok ? TEXT.main : TEXT.dim));
-      label.setInteractive().on('pointerover', () =>
-        this.infoText.setText(`${t.name}: здоровье ${t.hp}, урон ${t.damage}, броня ${t.armor}. Цена: ${formatRes(t.cost)}. Содержание в ход: ${formatRes(t.upkeep)}.`),
-      );
+      const info = `${t.name}: здоровье ${t.hp}, урон ${t.damage}, броня ${t.armor}. Цена: ${formatRes(t.cost)}. Содержание в ход: ${formatRes(t.upkeep)}.${check.reason ? ` ${check.reason}.` : ''}`;
+      label.setInteractive().on('pointerover', () => this.infoText.setText(info)).on('pointerdown', () => this.infoText.setText(info));
       this.root.add(label);
       this.root.add(this.add.text(x + 140, cy + 4, formatResShort(t.cost), textStyle(12, TEXT.dim)));
       const btn = new Button(this, x + COL_W - 50, cy + 10, 'Нанять', () => this.showError(hireUnit(this.state, st.id, typeId, p)), 80, 24, 12).setEnabled(check.ok);
