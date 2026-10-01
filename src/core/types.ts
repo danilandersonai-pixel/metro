@@ -53,6 +53,7 @@ export interface TunnelPos {
 
 export interface Squad {
   id: string;
+  name: string;
   factionId: string;
   /** До 6 бойцов. */
   units: Unit[];
@@ -222,6 +223,8 @@ export interface Faction {
   unitPool: string[];
   canTrade: boolean;
   aiPersonality: AiPersonality;
+  /** Фракция без дипломатии (мутанты) — всегда враждебна всем. */
+  noDiplomacy?: boolean;
 }
 
 export type RelationStatus = 'war' | 'neutral' | 'peace' | 'alliance';

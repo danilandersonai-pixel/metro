@@ -40,6 +40,7 @@ export interface BattleSceneData {
 type Mode = { kind: 'basic' } | { kind: 'ability'; abilityId: string };
 
 const AI_DELAY_MS = 450;
+const AUTO_DELAY_MS = 120;
 const LAYOUT = {
   queueY: 34,
   fieldTop: 100,
@@ -398,7 +399,7 @@ export class BattleScene extends Phaser.Scene {
     if (this.aiTimer || this.state.result) return;
     const actor = currentActor(this.state);
     if (!actor || this.isPlayerControlled(actor.side)) return;
-    this.aiTimer = this.time.delayedCall(AI_DELAY_MS, () => {
+    this.aiTimer = this.time.delayedCall(this.autoBattle ? AUTO_DELAY_MS : AI_DELAY_MS, () => {
       this.aiTimer = null;
       if (this.state.result) return;
       const a = currentActor(this.state);

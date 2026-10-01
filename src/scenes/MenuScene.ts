@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { createButton } from '../ui/Button';
+import { startNewGame } from '../game/session';
 
 // Главное меню.
 export class MenuScene extends Phaser.Scene {
@@ -28,7 +29,10 @@ export class MenuScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     const startY = height * 0.48;
-    createButton(this, cx, startY, 'Новая игра', () => this.scene.start('MapScene'));
+    createButton(this, cx, startY, 'Новая игра', () => {
+      startNewGame();
+      this.scene.start('MapScene');
+    });
     createButton(this, cx, startY + 64, 'Тестовый бой', () => this.scene.start('BattleScene'));
     createButton(this, cx, startY + 128, 'Станция', () => this.scene.start('StationScene'));
     createButton(this, cx, startY + 192, 'Диалог квеста', () =>

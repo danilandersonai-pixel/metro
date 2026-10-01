@@ -2,7 +2,29 @@
   "map": {
     "squadMovePoints": 2,
     "maxSquadSize": 6,
-    "healPerTurnOnOwnStation": 0.25
+    "healPerTurnOnOwnStation": 0.25,
+    "buildingDamageChance": 0.3,
+    "captureRelationPenalty": 25,
+    "neutralForcePenalty": 10,
+    "negotiateAmmoPerPopulation": 1,
+    "warRelationValue": -60,
+    "ambush": {
+      "chancePerDanger": 0.12,
+      "unitsBase": 2,
+      "unitsPerDanger": 1,
+      "poolByDanger": {
+        "1": ["rat_swarm", "rat_swarm", "spitter"],
+        "2": ["rat_swarm", "spitter", "night_hunter"],
+        "3": ["spitter", "night_hunter", "tunnel_crawler"]
+      }
+    }
+  },
+  "relations": {
+    "min": -100,
+    "max": 100,
+    "warBelow": -50,
+    "peaceAbove": 20,
+    "allianceAbove": 70
   },
   "battle": {
     "rows": 2,

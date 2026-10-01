@@ -1,0 +1,20 @@
+{
+  "playerFactionId": "sokolniki_community",
+  "resources": {
+    "sokolniki_community": { "ammo": 200, "food": 60, "fuel": 20, "power": 10, "meds": 6, "scrap": 20 },
+    "krasnoselsk_commune": { "ammo": 200, "food": 60, "fuel": 20, "power": 10, "meds": 4, "scrap": 20 },
+    "ring_trade_union": { "ammo": 400, "food": 80, "fuel": 40, "power": 20, "meds": 10, "scrap": 30 },
+    "mutants": {}
+  },
+  "relations": [
+    { "a": "sokolniki_community", "b": "krasnoselsk_commune", "value": -60 },
+    { "a": "sokolniki_community", "b": "ring_trade_union", "value": 10 },
+    { "a": "krasnoselsk_commune", "b": "ring_trade_union", "value": -20 }
+  ],
+  "squads": [
+    { "factionId": "sokolniki_community", "name": "Первый отряд", "stationId": "sokolniki",
+      "units": [{ "type": "stormtrooper" }, { "type": "militia" }, { "type": "rifleman" }, { "type": "rifleman" }, { "type": "medic" }] },
+    { "factionId": "krasnoselsk_commune", "name": "Отряд коммуны", "stationId": "krasnoselskaya",
+      "units": [{ "type": "stormtrooper" }, { "type": "militia" }, { "type": "militia" }, { "type": "rifleman" }] }
+  ]
+}

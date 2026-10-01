@@ -102,4 +102,5 @@ export interface BattleState {
   log: BattleLogEntry[];
   result: BattleResult | null;
   rng: Rng;
+  defenderSide: Side;
 }

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "sokolniki_community", "name": "Община Сокольников", "color": "#3f7fbf",
+    "ideology": "Вольная община: каждый держит свой участок тоннеля и голосует на общем сходе.",
+    "startStations": ["sokolniki"], "unitPool": ["militia", "rifleman", "stormtrooper", "medic", "scout", "sniper"],
+    "canTrade": true, "aiPersonality": "trader"
+  },
+  {
+    "id": "krasnoselsk_commune", "name": "Коммуна Красносельской", "color": "#b04a3a",
+    "ideology": "Строгая коммуна: общие склады, нормы выдачи и вечная нехватка всего.",
+    "startStations": ["krasnoselskaya", "krasnye_vorota"], "unitPool": ["militia", "stormtrooper", "rifleman", "machinegunner", "medic"],
+    "canTrade": false, "aiPersonality": "aggressor"
+  },
+  {
+    "id": "ring_trade_union", "name": "Торговый союз Кольца", "color": "#d9a441",
+    "ideology": "Купцы и охрана караванов. Патрон — мера всех вещей.",
+    "startStations": ["komsomolskaya", "okhotny_ryad"], "unitPool": ["militia", "rifleman", "machinegunner", "medic", "engineer"],
+    "canTrade": true, "aiPersonality": "trader"
+  },
+  {
+    "id": "mutants", "name": "Мутанты", "color": "#6a8f3a",
+    "ideology": "Тьма тоннелей.",
+    "startStations": ["bulvar_rokossovskogo", "biblioteka_lenina"], "unitPool": ["rat_swarm", "spitter", "night_hunter", "tunnel_crawler"],
+    "canTrade": false, "aiPersonality": "aggressor", "noDiplomacy": true
+  }
+]

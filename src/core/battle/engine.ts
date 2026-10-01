@@ -22,6 +22,8 @@ const B = BALANCE.battle;
 export interface CreateBattleInput {
   sides: [BattleSideInput, BattleSideInput];
   seed: number;
+  /** Сторона-защитник: побеждает, если бой затянулся дольше maxRounds. По умолчанию 1. */
+  defenderSide?: Side;
 }
 
 export function createBattle(input: CreateBattleInput): BattleState {
@@ -68,6 +70,7 @@ export function createBattle(input: CreateBattleInput): BattleState {
     log: [],
     result: null,
     rng,
+    defenderSide: input.defenderSide ?? 1,
   };
 
   log(state, `Бой: ${sides[0].name} против ${sides[1].name}`);
@@ -574,7 +577,7 @@ function activateCurrent(state: BattleState): void {
     if (state.turnIndex >= state.queue.length) {
       if (state.round >= B.maxRounds) {
         log(state, 'Время вышло — защитники удержали позицию');
-        finish(state, 1, null);
+        finish(state, state.defenderSide, null);
         return;
       }
       startRound(state);
@@ -634,7 +637,7 @@ export function checkBattleEnd(state: BattleState): void {
   if (state.result) return;
   const alive0 = aliveOf(state, 0).length;
   const alive1 = aliveOf(state, 1).length;
-  if (alive0 === 0 && alive1 === 0) finish(state, 1, null);
+  if (alive0 === 0 && alive1 === 0) finish(state, state.defenderSide, null);
   else if (alive1 === 0) finish(state, 0, null);
   else if (alive0 === 0) finish(state, 1, null);
 }
