@@ -235,6 +235,7 @@ export function hitChance(
   accuracyBonus = 0,
 ): number {
   const raw =
+    B.baseHitBonus +
     attacker.accuracy +
     effectAccuracy(attacker) +
     auraAccuracy(state, attacker.side) +
@@ -479,7 +480,7 @@ function dealDamage(state: BattleState, attacker: Combatant | null, target: Comb
 function doHeal(state: BattleState, actor: Combatant, target: Combatant, amount: number): void {
   const healed = Math.min(target.maxHp - target.hp, Math.round(amount));
   target.hp += healed;
-  log(state, `${actor.name} лечит ${target.name}: +${healed}`);
+  if (healed > 0) log(state, `${actor.name} лечит ${target.name}: +${healed}`);
 }
 
 export function addEffect(state: BattleState, target: Combatant, app: EffectApplication): void {

@@ -1,6 +1,59 @@
 import Phaser from 'phaser';
+import { COLORS, textStyle } from './theme';
 
-// Простая текстовая кнопка: прямоугольник + подпись + подсветка при наведении.
+// Кнопка: прямоугольник + подпись. Поддерживает выключение и «нажатое» состояние.
+export class Button extends Phaser.GameObjects.Container {
+  private bg: Phaser.GameObjects.Rectangle;
+  private label: Phaser.GameObjects.Text;
+  private enabled = true;
+  private pressed = false;
+
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    text: string,
+    private onClick: () => void,
+    width = 260,
+    height = 48,
+    fontSize = 20,
+  ) {
+    super(scene, x, y);
+    this.bg = scene.add.rectangle(0, 0, width, height, COLORS.button).setStrokeStyle(2, COLORS.border);
+    this.label = scene.add.text(0, 0, text, textStyle(fontSize)).setOrigin(0.5);
+    this.add([this.bg, this.label]);
+    this.setSize(width, height);
+    this.setInteractive({ useHandCursor: true });
+    this.on('pointerover', () => this.enabled && !this.pressed && this.bg.setFillStyle(COLORS.buttonHover));
+    this.on('pointerout', () => this.refresh());
+    this.on('pointerup', () => this.enabled && this.onClick());
+    scene.add.existing(this);
+  }
+
+  setEnabled(enabled: boolean): this {
+    this.enabled = enabled;
+    this.refresh();
+    return this;
+  }
+
+  setPressed(pressed: boolean): this {
+    this.pressed = pressed;
+    this.refresh();
+    return this;
+  }
+
+  setText(text: string): this {
+    this.label.setText(text);
+    return this;
+  }
+
+  private refresh(): void {
+    this.bg.setFillStyle(!this.enabled ? COLORS.buttonDisabled : this.pressed ? COLORS.buttonActive : COLORS.button);
+    this.label.setAlpha(this.enabled ? 1 : 0.4);
+  }
+}
+
+/** Короткая запись для кнопок без состояния. */
 export function createButton(
   scene: Phaser.Scene,
   x: number,
@@ -9,19 +62,6 @@ export function createButton(
   onClick: () => void,
   width = 260,
   height = 48,
-): Phaser.GameObjects.Container {
-  const bg = scene.add
-    .rectangle(0, 0, width, height, 0x2a2f36)
-    .setStrokeStyle(2, 0x6b7785);
-  const text = scene.add
-    .text(0, 0, label, { fontFamily: 'sans-serif', fontSize: '20px', color: '#e6e1d3' })
-    .setOrigin(0.5);
-
-  const container = scene.add.container(x, y, [bg, text]);
-  container.setSize(width, height);
-  container.setInteractive({ useHandCursor: true });
-  container.on('pointerover', () => bg.setFillStyle(0x3b424b));
-  container.on('pointerout', () => bg.setFillStyle(0x2a2f36));
-  container.on('pointerup', onClick);
-  return container;
+): Button {
+  return new Button(scene, x, y, label, onClick, width, height);
 }

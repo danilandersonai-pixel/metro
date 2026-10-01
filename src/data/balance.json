@@ -10,6 +10,7 @@
     "slotsPerRowLarge": 6,
     "maxRounds": 40,
     "defendDamageMultiplier": 0.5,
+    "baseHitBonus": 0.1,
     "hitChanceMin": 0.05,
     "hitChanceMax": 0.95,
     "damageRandomMin": 0.85,

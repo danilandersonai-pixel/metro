@@ -114,6 +114,8 @@ export interface Effect {
 export interface EffectDef {
   id: EffectId;
   name: string;
+  /** Короткая подпись для карточки бойца. */
+  short: string;
   positive: boolean;
   maxStacks: number;
   /** Урон за стак в начале хода носителя (без учёта брони). */
