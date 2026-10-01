@@ -3,6 +3,9 @@ import { BALANCE } from './content';
 import { stationEffect } from './economy/buildings';
 import { ownedStations, processEconomy, factionUnits } from './economy/turn';
 import { activeUnits } from './map/movement';
+import { processEvents } from './events';
+import { runFactionAi } from './factions/ai';
+import { processTreaties } from './factions/diplomacy';
 import type { GameState } from './state';
 import { maxHpOf } from './units/stats';
 
@@ -11,15 +14,31 @@ export interface TurnReport {
   messages: string[];
 }
 
-export function endTurn(state: GameState): TurnReport {
+export interface EndTurnOptions {
+  /** Случайные события и набеги (по умолчанию включены; в тестах можно выключить). */
+  events?: boolean;
+  /** Ходы ИИ-фракций. */
+  ai?: boolean;
+}
+
+export function endTurn(state: GameState, opts: EndTurnOptions = {}): TurnReport {
   if (state.pendingBattle) throw new Error('endTurn: сначала проведите бой');
   const firstMessage = state.messages.length;
 
   // Экономика всех фракций: доход → содержание → стройка
   for (const factionId of Object.keys(state.factions)) processEconomy(state, factionId);
+  processTreaties(state);
 
   restoreSquads(state);
+
+  // События: набеги мутантов и случайные события
+  if (opts.events !== false) processEvents(state);
+
+  // Ходы ИИ-фракций
+  if (opts.ai !== false) for (const factionId of Object.keys(state.factions)) runFactionAi(state, factionId);
+
   updateDefeated(state);
+  state.turnCounters = {};
 
   state.turn++;
   return { turn: state.turn, messages: state.messages.slice(firstMessage).map((m) => m.text) };

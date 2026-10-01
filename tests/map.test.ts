@@ -6,6 +6,9 @@ import { findPath, neighbors, visibleStations } from '../src/core/map/graph';
 import { moveSquad } from '../src/core/map/movement';
 import { createNewGame, newUnit, type GameState } from '../src/core/state';
 import { endTurn } from '../src/core/turn';
+
+/** Без случайных событий и ИИ — проверяем только свою механику. */
+const QUIET = { events: false, ai: false };
 import { BALANCE } from '../src/core/content';
 
 const PLAYER = 'sokolniki_community';
@@ -72,7 +75,7 @@ describe('движение и захват', () => {
     const sq = playerSquad(s);
     sq.movePoints = 0;
     expect(moveSquad(s, sq.id, 'preobrazhenskaya_ploshchad').kind).toBe('invalid');
-    endTurn(s);
+    endTurn(s, QUIET);
     expect(sq.movePoints).toBe(BALANCE.map.squadMovePoints);
   });
 
@@ -153,7 +156,7 @@ describe('движение и захват', () => {
     sq.movePoints = 1;
     expect(moveSquad(s, sq.id, 'lubyanka').kind).toBe('in_tunnel');
     expect(sq.tunnelPos).toEqual({ from: 'chistye_prudy', to: 'lubyanka', progress: 1 });
-    endTurn(s);
+    endTurn(s, QUIET);
     expect(moveSquad(s, sq.id, 'lubyanka').kind).toBe('captured');
     expect(sq.stationId).toBe('lubyanka');
   });
@@ -190,7 +193,7 @@ describe('движение и захват', () => {
     const sq = playerSquad(s);
     const u = sq.units[0];
     u.hp = 10;
-    endTurn(s);
+    endTurn(s, QUIET);
     expect(u.hp).toBeGreaterThan(10);
   });
 });

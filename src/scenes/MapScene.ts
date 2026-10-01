@@ -22,6 +22,8 @@ import type { BattleSceneData } from './BattleScene';
 import { Button } from '../ui/Button';
 import { Dialog } from '../ui/Dialog';
 import { drawResourceBar } from '../ui/ResourceBar';
+import { applyEventChoice, canChoose, eventText, getEvent } from '../core/events';
+import { makePeace } from '../core/factions/diplomacy';
 import { getBuilding, resourceName } from '../core/content';
 import { COLORS, TEXT, textStyle } from '../ui/theme';
 
@@ -75,7 +77,77 @@ export class MapScene extends Phaser.Scene {
     // Вернулись из боя — показать, что было дальше.
     const follow = session.followUp;
     session.followUp = null;
-    if (follow) this.handleMoveResult(follow, null, {});
+    if (follow && follow.kind !== 'battle') this.handleMoveResult(follow, null, {});
+    else this.processPending();
+  }
+
+  /** Показать следующий ожидающий бой или событие. */
+  private processPending(): void {
+    const pb = this.state.pendingBattle;
+    if (pb) {
+      this.showBattleDialog();
+      return;
+    }
+    const ev = this.state.pendingEvents.shift();
+    if (!ev) {
+      this.checkGameOver();
+      return;
+    }
+    if (ev.kind === 'event') {
+      const def = getEvent(ev.eventId);
+      this.addUi(
+        new Dialog(
+          this,
+          def.title,
+          eventText(this.state, ev.eventId, ev.stationId),
+          def.choices.map((c, i) => ({
+            label: c.text,
+            enabled: canChoose(this.state, c),
+            onClick: () => {
+              applyEventChoice(this.state, ev.eventId, ev.stationId, i);
+              this.redraw();
+              this.processPending();
+            },
+          })),
+          620,
+        ),
+      );
+    } else {
+      const f = getFaction(ev.factionId);
+      this.addUi(
+        new Dialog(this, 'Предложение мира', `${f.name} предлагает прекратить войну.`, [
+          {
+            label: 'Принять',
+            onClick: () => {
+              makePeace(this.state, this.state.playerFactionId, ev.factionId);
+              this.redraw();
+              this.processPending();
+            },
+          },
+          { label: 'Отказать', onClick: () => this.processPending() },
+        ]),
+      );
+    }
+  }
+
+  private showBattleDialog(): void {
+    const b = this.state.pendingBattle;
+    if (!b) return;
+    const st = this.state.stations[b.targetStationId];
+    const text =
+      b.kind === 'ambush'
+        ? 'В тоннеле на отряд напали мутанты!'
+        : b.kind === 'raid'
+          ? `Мутанты атакуют станцию ${st.name}! Защитники — гарнизон и отряды на станции.`
+          : b.attackerSide === 1
+            ? `${getFaction(b.attackerFactionId).name} атакует станцию ${st.name}!`
+            : `Бой за станцию ${st.name}.`;
+    this.addUi(
+      new Dialog(this, 'Бой!', text, [
+        { label: 'В бой', onClick: () => this.startBattle() },
+        { label: 'Быстрый бой', onClick: () => this.quickBattle() },
+      ]),
+    );
   }
 
   // -------------------------------------------------------------------------
@@ -133,6 +205,7 @@ export class MapScene extends Phaser.Scene {
     );
     this.addUi(new Button(this, PANEL_X + PANEL_W / 2 + 4, this.scale.height - 36, 'Конец хода', () => this.onEndTurn(), PANEL_W - 10, 48, 20));
     this.addUi(new Button(this, 60, 22, 'Меню', () => this.scene.start('MenuScene'), 100, 32, 15));
+    this.addUi(new Button(this, PANEL_X + PANEL_W / 2 + 4, this.scale.height - 92, 'Дипломатия и торговля', () => this.scene.start('DiplomacyScene'), PANEL_W - 10, 40, 16));
   }
 
   private redraw(): void {
@@ -416,20 +489,9 @@ export class MapScene extends Phaser.Scene {
         );
         break;
       }
-      case 'battle': {
-        const b = result.battle;
-        const text =
-          b.kind === 'ambush'
-            ? 'В тоннеле на отряд напали мутанты!'
-            : `Бой за станцию ${this.state.stations[b.targetStationId].name}.`;
-        this.addUi(
-          new Dialog(this, 'Бой!', text, [
-            { label: 'В бой', onClick: () => this.startBattle() },
-            { label: 'Быстрый бой', onClick: () => this.quickBattle() },
-          ]),
-        );
+      case 'battle':
+        this.showBattleDialog();
         break;
-      }
       case 'captured':
         this.addUi(new Dialog(this, 'Станция наша', `${this.state.stations[result.stationId].name} теперь под вашим контролем.`, [{ label: 'Отлично' }]));
         break;
@@ -461,32 +523,44 @@ export class MapScene extends Phaser.Scene {
     const pending = this.state.pendingBattle;
     if (!pending) return;
     const { outcome, follow } = autoResolvePending(this.state);
-    const won = outcome.winner === pending.attackerSide;
-    const lost = outcome.sides[pending.attackerSide].dead.length;
+    // Сторона игрока: нападающий — если игрок напал, иначе защитник.
+    const playerSide = pending.attackerFactionId === this.state.playerFactionId ? pending.attackerSide : ((1 - pending.attackerSide) as 0 | 1);
+    const won = outcome.winner === playerSide;
+    const lost = outcome.sides[playerSide].dead.length;
     const lootText = Object.entries(outcome.loot).map(([k, v]) => `${resourceName(k)}: +${v}`).join(', ');
+    const levels = outcome.sides[playerSide].levelUps.map((l) => `${l.name} — ур. ${l.level}`).join(', ');
     this.redraw();
     this.addUi(
       new Dialog(
         this,
         won ? 'Победа' : 'Поражение',
-        `Бой длился ${outcome.rounds} раунд(ов). Потери: ${lost}.${won && lootText ? `\nТрофеи: ${lootText}` : ''}`,
-        [{ label: 'Дальше', onClick: () => follow && follow.kind !== 'captured' && this.handleMoveResult(follow, null, {}) }],
+        `Бой длился ${outcome.rounds} раунд(ов). Потери: ${lost}.${won && lootText ? `\nТрофеи: ${lootText}` : ''}${levels ? `\nНовые уровни: ${levels}` : ''}`,
+        [
+          {
+            label: 'Дальше',
+            onClick: () => {
+              if (follow && follow.kind !== 'captured' && follow.kind !== 'battle') this.handleMoveResult(follow, null, {});
+              else this.processPending();
+            },
+          },
+        ],
       ),
     );
   }
 
   private onEndTurn(): void {
     if (this.state.pendingBattle) {
-      this.startBattle();
+      this.showBattleDialog();
       return;
     }
     const report = endTurn(this.state);
     this.selection = { kind: 'none' };
     this.redraw();
     if (report.messages.length) {
-      this.addUi(new Dialog(this, `Ход ${report.turn}`, report.messages.join('\n'), [{ label: 'Дальше' }]));
+      this.addUi(new Dialog(this, `Ход ${report.turn}`, report.messages.slice(-12).join('\n'), [{ label: 'Дальше', onClick: () => this.processPending() }], 640));
+    } else {
+      this.processPending();
     }
-    this.checkGameOver();
   }
 
   private checkGameOver(): void {

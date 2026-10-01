@@ -30,8 +30,18 @@ export interface GameState {
   messages: { turn: number; text: string }[];
   /** Бой, ожидающий проведения (игроку нужно открыть экран боя). */
   pendingBattle: PendingBattle | null;
+  /** Следующие бои с участием игрока (например, несколько атак за один ход). */
+  battleQueue: PendingBattle[];
+  /** События и предложения, ждущие решения игрока. */
+  pendingEvents: PendingEvent[];
+  /** Счётчики «за ход» (например, рост отношений от торговли). Сбрасываются в конце хода. */
+  turnCounters: Record<string, number>;
   rng: Rng;
 }
+
+export type PendingEvent =
+  | { kind: 'event'; eventId: string; stationId: string }
+  | { kind: 'peace_offer'; factionId: string };
 
 export const SAVE_VERSION = 1;
 
@@ -63,6 +73,9 @@ export function createNewGame(seed: number): GameState {
     nextId: 1,
     messages: [],
     pendingBattle: null,
+    battleQueue: [],
+    pendingEvents: [],
+    turnCounters: {},
     rng: new Rng(seed),
   };
 
@@ -119,4 +132,10 @@ export function createNewGame(seed: number): GameState {
 
 export function relationKey(a: string, b: string): string {
   return a < b ? `${a}|${b}` : `${b}|${a}`;
+}
+
+/** Поставить бой в очередь: если сейчас боя нет — он становится текущим. */
+export function queueBattle(state: GameState, battle: PendingBattle): void {
+  if (!state.pendingBattle) state.pendingBattle = battle;
+  else state.battleQueue.push(battle);
 }

@@ -88,6 +88,73 @@
   "experience": {
     "maxLevel": 20,
     "xpBase": 100,
-    "xpExponent": 1.5
+    "xpExponent": 1.5,
+    "xpPerEnemyLevel": 20,
+    "xpKillBonus": 15
+  },
+  "diplomacy": {
+    "giftAmmoPerPoint": 5,
+    "giftMaxPoints": 15,
+    "personalityMod": { "aggressor": -15, "trader": 10, "isolationist": 0 },
+    "strengthModPerRatio": 20,
+    "peaceAcceptThreshold": -55,
+    "peaceRelationValue": 0,
+    "tradeAcceptThreshold": 0,
+    "allianceAcceptThreshold": 75,
+    "allianceMinRelation": 70,
+    "tradeIncomeAmmo": 5,
+    "treatyRelationPerTurn": 1,
+    "tributeStrengthRatio": 1.5,
+    "tributeAmmo": 50,
+    "tributeRelationPenalty": 10,
+    "tributeRefusePenalty": 15,
+    "treatyBreakPenalty": 10,
+    "aiDeclareWarRelation": -30,
+    "aiDeclareWarRatio": 1.5,
+    "aiPeaceOfferRatio": 0.6,
+    "aiPeaceOfferChance": 0.2
+  },
+  "trade": {
+    "basePrices": { "food": 2, "fuel": 4, "power": 3, "meds": 10, "scrap": 3 },
+    "spread": 0.2,
+    "minMargin": 0.1,
+    "stockTarget": 50,
+    "stockInfluence": 0.5,
+    "lot": 5,
+    "relationPerTrade": 1,
+    "relationPerTurnCap": 3,
+    "marketDiscountPerLevel": 0.05
+  },
+  "events": {
+    "mutantAttackBase": 0.03,
+    "mutantAttackPerTurn": 0.003,
+    "mutantAttackMax": 0.25,
+    "mutantAttackUnitsBase": 2,
+    "mutantAttackTurnsPerExtraUnit": 10,
+    "mutantAttackMaxUnits": 8,
+    "mutantAttackPool": ["rat_swarm", "rat_swarm", "spitter", "night_hunter", "tunnel_crawler"],
+    "raidPopulationLoss": 0.2,
+    "lairRegrowEvery": 3,
+    "lairMaxGarrison": 6,
+    "randomEventChance": 0.25
+  },
+  "factionAi": {
+    "reserveAmmo": 60,
+    "gracePeriodTurns": 8,
+    "attackRatio": 1.3,
+    "defenseRatio": 1.2,
+    "desiredSquads": { "aggressor": 2, "trader": 1, "isolationist": 0 },
+    "minGarrison": 2,
+    "retreatHpFraction": 0.4,
+    "supplyPriceMult": 1.5,
+    "supplyMinStock": { "food": 20, "scrap": 20, "fuel": 6 },
+    "supplyBatch": 10,
+    "richAmmo": 400,
+    "foodStockTurnsPerDeficit": 10,
+    "buildPriority": {
+      "aggressor": ["recruitment_post", "mushroom_farm", "checkpoint", "workshop", "fuel_depot", "generator", "infirmary"],
+      "trader": ["mushroom_farm", "recruitment_post", "fuel_depot", "generator", "workshop", "checkpoint", "infirmary"],
+      "isolationist": ["checkpoint", "mushroom_farm", "recruitment_post", "infirmary", "fuel_depot", "generator", "workshop"]
+    }
   }
 }

@@ -5,6 +5,7 @@ import { MapScene } from './scenes/MapScene';
 import { StationScene } from './scenes/StationScene';
 import { BattleScene } from './scenes/BattleScene';
 import { QuestDialogScene } from './scenes/QuestDialogScene';
+import { DiplomacyScene } from './scenes/DiplomacyScene';
 
 // Точка входа: создаём игру Phaser и регистрируем сцены.
 new Phaser.Game({
@@ -17,5 +18,5 @@ new Phaser.Game({
     width: 1280,
     height: 720,
   },
-  scene: [BootScene, MenuScene, MapScene, StationScene, BattleScene, QuestDialogScene],
+  scene: [BootScene, MenuScene, MapScene, StationScene, BattleScene, QuestDialogScene, DiplomacyScene],
 });

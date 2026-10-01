@@ -8,7 +8,8 @@ import type { Squad, TunnelPos, Unit } from '../types';
 import { neighbors } from './graph';
 
 export interface PendingBattle {
-  kind: 'station' | 'ambush';
+  /** station — штурм станции отрядом; ambush — засада в тоннеле; raid — набег мутантов на станцию. */
+  kind: 'station' | 'ambush' | 'raid';
   attackerSquadId: string;
   attackerFactionId: string;
   targetStationId: string;
@@ -16,7 +17,7 @@ export interface PendingBattle {
   retreatStationId: string;
   /** Сторона нападающего в бою (игрок всегда на стороне 0 — слева). */
   attackerSide: Side;
-  /** Мутанты из засады. */
+  /** Мутанты из засады или набега. */
   ambushUnits?: Unit[];
   /** Для засады: что делать после победы — дойти до станции или остаться в тоннеле. */
   continuation?: { arrive: boolean; tunnelPos: TunnelPos | null; opts: { declareWar?: boolean; neutralChoice?: 'force' | 'negotiate' } };
@@ -79,6 +80,7 @@ function factionName(id: string | null): string {
 
 /** Собрать вход для боя. Игрок всегда на стороне 0. */
 export function buildBattleInput(state: GameState, pending: PendingBattle): CreateBattleInput {
+  if (pending.kind === 'raid') return buildRaidInput(state, pending);
   const squad = state.squads.find((s) => s.id === pending.attackerSquadId);
   if (!squad) throw new Error('buildBattleInput: нет отряда нападающих');
   const player = state.playerFactionId;
@@ -127,6 +129,25 @@ export function buildBattleInput(state: GameState, pending: PendingBattle): Crea
     seed: pending.seed,
     defenderSide: (1 - pending.attackerSide) as Side,
   };
+}
+
+/** Набег мутантов: мутанты нападают, станция защищается (игрок, если это его станция, — слева). */
+function buildRaidInput(state: GameState, pending: PendingBattle): CreateBattleInput {
+  const st = state.stations[pending.targetStationId];
+  const d = defendersAt(state, st.id, 'mutants');
+  const [main, ...rest] = d.squads;
+  const owner = st.ownerFactionId;
+  const defender = {
+    name: owner ? getFaction(owner).name : 'Жители станции',
+    units: main ? main.units : d.garrison,
+    summoned: main ? [...rest.flatMap((s) => s.units), ...d.garrison] : [],
+    canRetreat: false,
+    ai: owner !== state.playerFactionId,
+    modifiers: stationDefenseModifiers(state, st.id),
+  };
+  const raiders = { name: 'Мутанты', units: pending.ambushUnits ?? [], canRetreat: false, ai: true };
+  const sides = pending.attackerSide === 0 ? [raiders, defender] : [defender, raiders];
+  return { sides: sides as CreateBattleInput['sides'], seed: pending.seed, defenderSide: (1 - pending.attackerSide) as Side };
 }
 
 /** Соседняя станция, куда может отступить отряд (своя или союзная). */

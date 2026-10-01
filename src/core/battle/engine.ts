@@ -4,6 +4,7 @@ import { BALANCE, EFFECTS, getAbility, getUnitType } from '../content';
 import { Rng } from '../rng';
 import type { AbilityDef, EffectApplication, Row, Unit } from '../types';
 import { computeStats } from '../units/stats';
+import { unitAbilities, unitPassives } from '../units/experience';
 import type {
   BattleAction,
   BattleSide,
@@ -103,8 +104,8 @@ function makeCombatant(unit: Unit, side: Side, row: Row, slot: number, summoned:
     evasion: stats.evasion,
     initiative: stats.initiative,
     attackType: type.attackType,
-    abilities: [...type.abilities],
-    passives: [...type.passives],
+    abilities: unitAbilities(unit.typeId, unit.level),
+    passives: unitPassives(unit.typeId, unit.level),
     effects: unit.effects.map((e) => ({ ...e })),
     cooldowns: {},
     defending: false,

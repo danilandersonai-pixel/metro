@@ -6,6 +6,9 @@ import { canHire, formSquad, hireUnit, moveToGarrison, moveToSquad } from '../sr
 import { stationDefenseModifiers } from '../src/core/map/battles';
 import { createNewGame, type GameState } from '../src/core/state';
 import { endTurn } from '../src/core/turn';
+
+/** Без случайных событий и ИИ — проверяем только свою механику. */
+const QUIET = { events: false, ai: false };
 import { maxHpOf } from '../src/core/units/stats';
 
 const P = 'sokolniki_community';
@@ -78,7 +81,7 @@ describe('стройка', () => {
     // Вторая стройка одновременно невозможна
     expect(canBuild(s, 'sokolniki', 'fuel_depot', P).ok).toBe(false);
     expect(stationDefenseModifiers(s, 'sokolniki').accuracyBonus ?? 0).toBe(0);
-    for (let i = 0; i < getBuilding('checkpoint').buildTurns; i++) endTurn(s);
+    for (let i = 0; i < getBuilding('checkpoint').buildTurns; i++) endTurn(s, QUIET);
     expect(constructionInProgress(s.stations.sokolniki)).toBeNull();
     expect(stationDefenseModifiers(s, 'sokolniki').accuracyBonus).toBeCloseTo(0.05);
   });
@@ -90,8 +93,8 @@ describe('стройка', () => {
     const before = forecastEconomy(s, P).income.food!;
     expect(canBuild(s, 'sokolniki', 'mushroom_farm', P).targetLevel).toBe(2);
     startConstruction(s, 'sokolniki', 'mushroom_farm', P);
-    endTurn(s);
-    endTurn(s);
+    endTurn(s, QUIET);
+    endTurn(s, QUIET);
     expect(forecastEconomy(s, P).income.food).toBe(before + 10);
   });
 
@@ -162,12 +165,12 @@ describe('найм и отряды', () => {
     const st = s.stations.sokolniki;
     const u = st.garrison[0];
     u.hp = 1;
-    endTurn(s);
+    endTurn(s, QUIET);
     const plain = u.hp - 1;
     u.hp = 1;
     st.buildings.push({ typeId: 'infirmary', level: 1, turnsLeft: 0, damaged: false });
     res(s).power = 100;
-    endTurn(s);
+    endTurn(s, QUIET);
     expect(u.hp - 1).toBeGreaterThan(plain);
     expect(u.hp).toBeLessThanOrEqual(maxHpOf(u));
   });

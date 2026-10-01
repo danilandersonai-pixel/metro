@@ -2,7 +2,7 @@
 import type { BattleOutcome, Side } from '../battle';
 import { BALANCE, getFaction } from '../content';
 import { changeRelation, declareWar, isAtWar, isFriendly } from '../factions/relations';
-import { addMessage, newUnit, type GameState } from '../state';
+import { addMessage, newUnit, queueBattle, type GameState } from '../state';
 import type { Resources, Squad, Unit } from '../types';
 import { addRes } from '../economy/resources';
 import {
@@ -101,8 +101,8 @@ function arrivalCheck(state: GameState, squad: Squad, stationId: string, opts: M
  * Возвращает, что произошло; при бое — state.pendingBattle заполнен.
  */
 export function moveSquad(state: GameState, squadId: string, toId: string, opts: MoveOptions = {}): MoveResult {
-  if (state.pendingBattle) return { kind: 'invalid', reason: 'Сначала проведите бой' };
   const squad = getSquad(state, squadId);
+  if (state.pendingBattle && squad.factionId === state.playerFactionId) return { kind: 'invalid', reason: 'Сначала проведите бой' };
   if (!canMove(state, squad, toId)) return { kind: 'invalid', reason: 'Туда нельзя пройти' };
 
   const cost = moveCost(state, squad, toId)!;
@@ -142,7 +142,7 @@ export function moveSquad(state: GameState, squadId: string, toId: string, opts:
         continuation: { arrive: arriving, tunnelPos: nextTunnelPos, opts },
         seed: state.rng.int(1, 1_000_000_000),
       };
-      state.pendingBattle = battle;
+      queueBattle(state, battle);
       return { kind: 'battle', battle };
     }
   }
@@ -210,7 +210,7 @@ function arrive(state: GameState, squad: Squad, stationId: string, retreatId: st
     };
     // Пока идёт бой, отряд стоит у входа на станцию — в точке отхода.
     placeSquad(squad, retreatId);
-    state.pendingBattle = battle;
+    queueBattle(state, battle);
     return { kind: 'battle', battle };
   }
 
@@ -252,6 +252,21 @@ export function resolveBattle(state: GameState, outcome: BattleOutcome): MoveRes
   const pending = state.pendingBattle;
   if (!pending) throw new Error('resolveBattle: нет ожидающего боя');
   state.pendingBattle = null;
+  const playerSide = pending.attackerFactionId === state.playerFactionId ? pending.attackerSide : pending.attackerSide === 1 ? 0 : null;
+  if (playerSide !== null) {
+    for (const lu of outcome.sides[playerSide].levelUps) addMessage(state, `${lu.name} получает уровень ${lu.level}`);
+  }
+  const follow = resolveBattleInner(state, pending, outcome);
+  // Следующий бой из очереди — только после того, как продолжение хода (возможный новый бой) обработано.
+  if (!state.pendingBattle) state.pendingBattle = state.battleQueue.shift() ?? null;
+  return follow;
+}
+
+function resolveBattleInner(state: GameState, pending: PendingBattle, outcome: BattleOutcome): MoveResult | null {
+  if (pending.kind === 'raid') {
+    resolveRaid(state, pending, outcome);
+    return null;
+  }
 
   const attackerSide = pending.attackerSide;
   const defenderSide = (1 - attackerSide) as Side;
@@ -320,4 +335,33 @@ export function resolveBattle(state: GameState, outcome: BattleOutcome): MoveRes
 
   state.squads = state.squads.filter((s) => s.units.length > 0);
   return follow;
+}
+
+/** Итог набега мутантов на станцию. */
+function resolveRaid(state: GameState, pending: PendingBattle, outcome: BattleOutcome): void {
+  const st = state.stations[pending.targetStationId];
+  const defenderSide = (1 - pending.attackerSide) as Side;
+  const d = defendersAt(state, st.id, 'mutants');
+  const out = outcome.sides[defenderSide];
+  for (const ds of d.squads) ds.units = applyOutcomeToUnits(ds.units, out);
+  st.garrison = applyOutcomeToUnits(st.garrison, out);
+  const defended = outcome.winner === defenderSide;
+  if (defended) {
+    if (st.ownerFactionId && state.factions[st.ownerFactionId]) addRes(state.factions[st.ownerFactionId].resources, outcome.loot);
+    if (st.ownerFactionId === state.playerFactionId) addMessage(state, `${st.name}: набег мутантов отбит`);
+  } else {
+    raidDamage(state, st.id);
+  }
+  state.squads = state.squads.filter((s) => s.units.length > 0);
+}
+
+/** Мутанты прорвались: гибнут жители, ломаются здания. */
+export function raidDamage(state: GameState, stationId: string): void {
+  const st = state.stations[stationId];
+  const lost = Math.round(st.population * BALANCE.events.raidPopulationLoss);
+  st.population -= lost;
+  for (const b of st.buildings) if (state.rng.chance(M.buildingDamageChance)) b.damaged = true;
+  if (st.ownerFactionId === state.playerFactionId) {
+    addMessage(state, `${st.name}: мутанты прорвались! Погибло жителей: ${lost}, здания повреждены`);
+  }
 }
