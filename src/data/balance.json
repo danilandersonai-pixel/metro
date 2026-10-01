@@ -1,0 +1,25 @@
+{
+  "map": {
+    "squadMovePoints": 2,
+    "maxSquadSize": 6,
+    "healPerTurnOnOwnStation": 0.25
+  },
+  "battle": {
+    "rows": 2,
+    "slotsPerRow": 3,
+    "defendDamageMultiplier": 0.5,
+    "hitChanceMin": 0.05,
+    "hitChanceMax": 0.95,
+    "damageRandomMin": 0.85,
+    "damageRandomMax": 1.15,
+    "armorConstant": 50,
+    "critChance": 0.1,
+    "critMultiplier": 1.5,
+    "retreatFromRound": 2
+  },
+  "experience": {
+    "maxLevel": 20,
+    "xpBase": 100,
+    "xpExponent": 1.5
+  }
+}
