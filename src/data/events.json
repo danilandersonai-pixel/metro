@@ -1,0 +1,37 @@
+[
+  { "id": "refugees", "trigger": "random", "weight": 3, "title": "Беженцы",
+    "text": "К блокпосту на станции {station} пришли беженцы с соседней линии — усталые, голодные, с детьми. Просят пустить.",
+    "choices": [
+      { "text": "Принять", "effects": { "population": 30, "resources": { "food": -15 } } },
+      { "text": "Отказать", "effects": { "morale": -5 } }
+    ] },
+  { "id": "caravan", "trigger": "random", "weight": 3, "title": "Караван",
+    "text": "Через {station} проходит караван челноков. Предлагают аптечки по сходной цене.",
+    "choices": [
+      { "text": "Купить (40 патронов)", "effects": { "resources": { "ammo": -40, "meds": 5 } } },
+      { "text": "Пропустить", "effects": {} }
+    ] },
+  { "id": "fever", "trigger": "random", "weight": 2, "title": "Лихорадка",
+    "text": "На станции {station} несколько человек слегли с жаром. Если ничего не делать, зараза пойдёт дальше.",
+    "choices": [
+      { "text": "Лечить (4 медикамента)", "effects": { "resources": { "meds": -4 } } },
+      { "text": "Изолировать больных", "effects": { "population": -20, "morale": -5 } }
+    ] },
+  { "id": "surface_cache", "trigger": "random", "weight": 2, "requiresTag": "surface_exit", "title": "Находка наверху",
+    "text": "Сталкеры со станции {station} нашли наверху полузасыпанный склад. Вынести всё — значит рискнуть людьми.",
+    "choices": [
+      { "text": "Вынести всё", "effects": { "resources": { "scrap": 20, "fuel": 6 }, "population": -5 } },
+      { "text": "Взять что рядом", "effects": { "resources": { "scrap": 8 } } }
+    ] },
+  { "id": "wedding", "trigger": "random", "weight": 2, "title": "Свадьба",
+    "text": "На станции {station} играют свадьбу. Люди просят выделить еды на праздник.",
+    "choices": [
+      { "text": "Выделить еду", "effects": { "resources": { "food": -10 }, "morale": 10 } },
+      { "text": "Не до праздников", "effects": { "morale": -3 } }
+    ] },
+  { "id": "deserter_cache", "trigger": "random", "weight": 1, "title": "Тайник дезертира",
+    "text": "Патруль у станции {station} наткнулся на тайник: ящик патронов и старый противогаз.",
+    "choices": [
+      { "text": "Забрать", "effects": { "resources": { "ammo": 30 } } }
+    ] }
+]

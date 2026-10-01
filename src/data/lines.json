@@ -1,0 +1,12 @@
+[
+  {
+    "id": "sokolnicheskaya",
+    "name": "Сокольническая линия",
+    "color": "#e4312b",
+    "stationIds": [
+      "bulvar_rokossovskogo", "cherkizovskaya", "preobrazhenskaya_ploshchad", "sokolniki",
+      "krasnoselskaya", "komsomolskaya", "krasnye_vorota", "chistye_prudy", "lubyanka",
+      "okhotny_ryad", "biblioteka_lenina", "kropotkinskaya"
+    ]
+  }
+]

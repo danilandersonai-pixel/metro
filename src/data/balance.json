@@ -1,0 +1,160 @@
+{
+  "map": {
+    "squadMovePoints": 2,
+    "maxSquadSize": 6,
+    "healPerTurnOnOwnStation": 0.25,
+    "buildingDamageChance": 0.3,
+    "captureRelationPenalty": 25,
+    "neutralForcePenalty": 10,
+    "negotiateAmmoPerPopulation": 1,
+    "warRelationValue": -60,
+    "ambush": {
+      "chancePerDanger": 0.12,
+      "unitsBase": 2,
+      "unitsPerDanger": 1,
+      "poolByDanger": {
+        "1": ["rat_swarm", "rat_swarm", "spitter"],
+        "2": ["rat_swarm", "spitter", "night_hunter"],
+        "3": ["spitter", "night_hunter", "tunnel_crawler"]
+      }
+    }
+  },
+  "economy": {
+    "taxAmmoPerPopulation": 0.1,
+    "foodPer100Population": 2,
+    "populationGrowth": 0.03,
+    "basePopulationCap": 300,
+    "moraleStart": 100,
+    "moraleLossOnShortage": 15,
+    "moraleRecovery": 5,
+    "desertionMoraleThreshold": 30,
+    "desertionChance": 0.5,
+    "lowMoraleThreshold": 50,
+    "lowMoraleAccuracyPenalty": 0.1,
+    "maxGarrison": 12,
+    "repairCostFraction": 0.5,
+    "upgradeCostPerLevel": 1.0,
+    "stalkerLossPopulation": 5
+  },
+  "relations": {
+    "min": -100,
+    "max": 100,
+    "warBelow": -50,
+    "peaceAbove": 20,
+    "allianceAbove": 70
+  },
+  "battle": {
+    "rows": 2,
+    "slotsPerRow": 3,
+    "slotsPerRowLarge": 6,
+    "maxRounds": 40,
+    "defendDamageMultiplier": 0.5,
+    "baseHitBonus": 0.1,
+    "hitChanceMin": 0.05,
+    "hitChanceMax": 0.95,
+    "damageRandomMin": 0.85,
+    "damageRandomMax": 1.15,
+    "armorConstant": 50,
+    "critChance": 0.1,
+    "critMultiplier": 1.5,
+    "minDamage": 1,
+    "supportAttackMultiplier": 0.5,
+    "retreatFromRound": 2,
+    "retreatDamageChance": 0.5,
+    "retreatDamageFraction": 0.15,
+    "mercenaryDownedTurns": 3,
+    "openingStrikeHits": 2
+  },
+  "battleAi": {
+    "healThreshold": 0.4,
+    "priorityTargetBonus": 0.25,
+    "priorityAttackTypes": ["ranged", "support"]
+  },
+  "unitGrowth": {
+    "hpPerLevel": 0.08,
+    "damagePerLevel": 0.06,
+    "armorPerLevel": 1,
+    "accuracyPerLevel": 0.005,
+    "initiativePerLevel": 0.2
+  },
+  "loot": {
+    "ammoPerKill": 6,
+    "ammoPerKillLevel": 2,
+    "medsChance": 0.25,
+    "medsAmount": 2,
+    "scrapChance": 0.35,
+    "scrapAmount": 3
+  },
+  "experience": {
+    "maxLevel": 20,
+    "xpBase": 100,
+    "xpExponent": 1.5,
+    "xpPerEnemyLevel": 20,
+    "xpKillBonus": 15
+  },
+  "diplomacy": {
+    "giftAmmoPerPoint": 5,
+    "giftMaxPoints": 15,
+    "personalityMod": { "aggressor": -15, "trader": 10, "isolationist": 0 },
+    "strengthModPerRatio": 20,
+    "peaceAcceptThreshold": -55,
+    "peaceRelationValue": 0,
+    "tradeAcceptThreshold": 0,
+    "allianceAcceptThreshold": 75,
+    "allianceMinRelation": 70,
+    "tradeIncomeAmmo": 5,
+    "treatyRelationPerTurn": 1,
+    "tributeStrengthRatio": 1.5,
+    "tributeAmmo": 50,
+    "tributeRelationPenalty": 10,
+    "tributeRefusePenalty": 15,
+    "treatyBreakPenalty": 10,
+    "aiDeclareWarRelation": -30,
+    "aiDeclareWarRatio": 1.5,
+    "aiPeaceOfferRatio": 0.6,
+    "aiPeaceOfferChance": 0.2
+  },
+  "trade": {
+    "basePrices": { "food": 2, "fuel": 4, "power": 3, "meds": 10, "scrap": 3 },
+    "spread": 0.2,
+    "minMargin": 0.1,
+    "stockTarget": 50,
+    "stockInfluence": 0.5,
+    "lot": 5,
+    "relationPerTrade": 1,
+    "relationPerTurnCap": 3,
+    "marketDiscountPerLevel": 0.05
+  },
+  "events": {
+    "mutantAttackBase": 0.03,
+    "mutantAttackPerTurn": 0.003,
+    "mutantAttackMax": 0.25,
+    "mutantAttackUnitsBase": 2,
+    "mutantAttackTurnsPerExtraUnit": 10,
+    "mutantAttackMaxUnits": 8,
+    "mutantAttackPool": ["rat_swarm", "rat_swarm", "spitter", "night_hunter", "tunnel_crawler"],
+    "raidPopulationLoss": 0.2,
+    "lairRegrowEvery": 3,
+    "lairMaxGarrison": 6,
+    "randomEventChance": 0.25
+  },
+  "factionAi": {
+    "reserveAmmo": 60,
+    "gracePeriodTurns": 8,
+    "attackRatio": 1.3,
+    "defenseRatio": 1.2,
+    "desiredSquads": { "aggressor": 2, "trader": 1, "isolationist": 0 },
+    "minGarrison": 2,
+    "retreatHpFraction": 0.4,
+    "supplyPriceMult": 1.5,
+    "supplyMinStock": { "food": 20, "scrap": 20, "fuel": 6 },
+    "supplyBatch": 10,
+    "richAmmo": 400,
+    "foodStockTurnsPerDeficit": 10,
+    "buildPriority": {
+      "aggressor": ["recruitment_post", "mushroom_farm", "checkpoint", "workshop", "fuel_depot", "generator", "infirmary"],
+      "trader": ["mushroom_farm", "recruitment_post", "fuel_depot", "generator", "workshop", "checkpoint", "infirmary"],
+      "isolationist": ["checkpoint", "mushroom_farm", "recruitment_post", "infirmary", "fuel_depot", "generator", "workshop"]
+    }
+  }
+}

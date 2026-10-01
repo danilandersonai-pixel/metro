@@ -1,0 +1,8 @@
+[
+  { "id": "ammo", "name": "Патроны", "short": "Патр." },
+  { "id": "food", "name": "Еда", "short": "Еда" },
+  { "id": "fuel", "name": "Топливо", "short": "Топл." },
+  { "id": "power", "name": "Энергия", "short": "Энерг." },
+  { "id": "meds", "name": "Медикаменты", "short": "Мед." },
+  { "id": "scrap", "name": "Хлам", "short": "Хлам" }
+]

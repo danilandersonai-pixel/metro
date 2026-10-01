@@ -1,0 +1,26 @@
+{
+  "demo": {
+    "player": {
+      "name": "Отряд игрока",
+      "units": [
+        { "type": "stormtrooper", "row": 0, "slot": 0 },
+        { "type": "militia", "row": 0, "slot": 1 },
+        { "type": "stormtrooper", "row": 0, "slot": 2 },
+        { "type": "rifleman", "row": 1, "slot": 0 },
+        { "type": "medic", "row": 1, "slot": 1 },
+        { "type": "sniper", "row": 1, "slot": 2 }
+      ]
+    },
+    "enemy": {
+      "name": "Мутанты",
+      "units": [
+        { "type": "tunnel_crawler", "row": 0, "slot": 0 },
+        { "type": "night_hunter", "row": 0, "slot": 1 },
+        { "type": "rat_swarm", "row": 0, "slot": 2 },
+        { "type": "spitter", "row": 1, "slot": 0 },
+        { "type": "spitter", "row": 1, "slot": 1 },
+        { "type": "rat_swarm", "row": 1, "slot": 2 }
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+[
+  { "from": "bulvar_rokossovskogo", "to": "cherkizovskaya", "length": 1, "danger": 3 },
+  { "from": "cherkizovskaya", "to": "preobrazhenskaya_ploshchad", "length": 1, "danger": 2 },
+  { "from": "preobrazhenskaya_ploshchad", "to": "sokolniki", "length": 1, "danger": 1 },
+  { "from": "sokolniki", "to": "krasnoselskaya", "length": 1, "danger": 0 },
+  { "from": "krasnoselskaya", "to": "komsomolskaya", "length": 1, "danger": 0 },
+  { "from": "komsomolskaya", "to": "krasnye_vorota", "length": 1, "danger": 0 },
+  { "from": "krasnye_vorota", "to": "chistye_prudy", "length": 1, "danger": 1 },
+  { "from": "chistye_prudy", "to": "lubyanka", "length": 2, "danger": 2 },
+  { "from": "lubyanka", "to": "okhotny_ryad", "length": 1, "danger": 1 },
+  { "from": "okhotny_ryad", "to": "biblioteka_lenina", "length": 1, "danger": 2 },
+  { "from": "biblioteka_lenina", "to": "kropotkinskaya", "length": 3, "danger": 3 }
+]
