@@ -19,6 +19,23 @@
       }
     }
   },
+  "economy": {
+    "taxAmmoPerPopulation": 0.1,
+    "foodPer100Population": 2,
+    "populationGrowth": 0.03,
+    "basePopulationCap": 300,
+    "moraleStart": 100,
+    "moraleLossOnShortage": 15,
+    "moraleRecovery": 5,
+    "desertionMoraleThreshold": 30,
+    "desertionChance": 0.5,
+    "lowMoraleThreshold": 50,
+    "lowMoraleAccuracyPenalty": 0.1,
+    "maxGarrison": 12,
+    "repairCostFraction": 0.5,
+    "upgradeCostPerLevel": 1.0,
+    "stalkerLossPopulation": 5
+  },
   "relations": {
     "min": -100,
     "max": 100,
@@ -45,7 +62,8 @@
     "retreatFromRound": 2,
     "retreatDamageChance": 0.5,
     "retreatDamageFraction": 0.15,
-    "mercenaryDownedTurns": 3
+    "mercenaryDownedTurns": 3,
+    "openingStrikeHits": 2
   },
   "battleAi": {
     "healThreshold": 0.4,

@@ -34,9 +34,5 @@ export class MenuScene extends Phaser.Scene {
       this.scene.start('MapScene');
     });
     createButton(this, cx, startY + 64, 'Тестовый бой', () => this.scene.start('BattleScene'));
-    createButton(this, cx, startY + 128, 'Станция', () => this.scene.start('StationScene'));
-    createButton(this, cx, startY + 192, 'Диалог квеста', () =>
-      this.scene.start('QuestDialogScene'),
-    );
   }
 }

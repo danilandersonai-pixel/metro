@@ -21,6 +21,8 @@ import { requireState, session } from '../game/session';
 import type { BattleSceneData } from './BattleScene';
 import { Button } from '../ui/Button';
 import { Dialog } from '../ui/Dialog';
+import { drawResourceBar } from '../ui/ResourceBar';
+import { getBuilding, resourceName } from '../core/content';
 import { COLORS, TEXT, textStyle } from '../ui/theme';
 
 const TAG_NAMES: Record<StationTag, string> = {
@@ -28,15 +30,6 @@ const TAG_NAMES: Record<StationTag, string> = {
   surface_exit: 'выход на поверхность',
   abandoned: 'заброшена',
   infested: 'логово мутантов',
-};
-
-const RESOURCE_NAMES: Record<string, string> = {
-  ammo: 'Патроны',
-  food: 'Еда',
-  fuel: 'Топливо',
-  power: 'Энергия',
-  meds: 'Медикаменты',
-  scrap: 'Хлам',
 };
 
 const PANEL_X = 960;
@@ -152,22 +145,8 @@ export class MapScene extends Phaser.Scene {
 
   private drawTopBar(): void {
     this.topBar.removeAll(true);
-    const res = this.state.factions[this.state.playerFactionId].resources;
-    const items: [string, number | undefined][] = [
-      ['Патроны', res.ammo],
-      ['Еда', res.food],
-      ['Топливо', res.fuel],
-      ['Энергия', res.power],
-      ['Медикаменты', res.meds],
-      ['Хлам', res.scrap],
-    ];
-    this.topBar.add(this.add.text(130, 12, `Ход ${this.state.turn}`, textStyle(18, TEXT.accent, true)));
-    let x = 230;
-    for (const [name, v] of items) {
-      const t = this.add.text(x, 13, `${name}: ${v ?? 0}`, textStyle(15));
-      this.topBar.add(t);
-      x += t.width + 22;
-    }
+    this.topBar.add(this.add.text(126, 12, `Ход ${this.state.turn}`, textStyle(18, TEXT.accent, true)));
+    drawResourceBar(this, this.topBar, this.state, 210, 13);
   }
 
   // -------------------------------------------------------------------------
@@ -353,6 +332,14 @@ export class MapScene extends Phaser.Scene {
     }
     line(`Население: ${st.population}`, 14);
     if (st.tags.length) line(`Особенности: ${st.tags.map((t) => TAG_NAMES[t]).join(', ')}`, 13, TEXT.dim);
+    if (st.buildings.length) {
+      line(`Здания: ${st.buildings.map((b) => getBuilding(b.typeId).name + (b.level > 1 ? ` ${b.level}` : '') + (b.turnsLeft > 0 ? ' (стр.)' : b.damaged ? ' (повр.)' : '')).join(', ')}`, 13);
+    }
+    if (st.ownerFactionId === this.state.playerFactionId) {
+      y += 4;
+      this.panel.add(new Button(this, w / 2, y + 20, 'Управлять станцией', () => this.scene.start('StationScene', { stationId: st.id }), w, 40, 16));
+      y += 48;
+    }
     y += 6;
     line(`Гарнизон: ${st.garrison.length ? '' : 'нет'}`, 14, TEXT.accent);
     const counts = new Map<string, number>();
@@ -476,7 +463,7 @@ export class MapScene extends Phaser.Scene {
     const { outcome, follow } = autoResolvePending(this.state);
     const won = outcome.winner === pending.attackerSide;
     const lost = outcome.sides[pending.attackerSide].dead.length;
-    const lootText = Object.entries(outcome.loot).map(([k, v]) => `${RESOURCE_NAMES[k] ?? k}: +${v}`).join(', ');
+    const lootText = Object.entries(outcome.loot).map(([k, v]) => `${resourceName(k)}: +${v}`).join(', ');
     this.redraw();
     this.addUi(
       new Dialog(

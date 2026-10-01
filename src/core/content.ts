@@ -8,7 +8,9 @@ import linesJson from '../data/lines.json';
 import tunnelsJson from '../data/tunnels.json';
 import factionsJson from '../data/factions.json';
 import scenarioJson from '../data/scenario.json';
-import type { AbilityDef, EffectDef, EffectId, Faction, Line, Resources, StationTag, UnitType } from './types';
+import buildingsJson from '../data/buildings.json';
+import resourcesJson from '../data/resources.json';
+import type { AbilityDef, BuildingType, EffectDef, EffectId, Faction, Line, ResourceId, Resources, StationTag, UnitType } from './types';
 
 export const BALANCE = balanceJson;
 
@@ -80,4 +82,26 @@ export function getFaction(id: string): Faction {
   const f = FACTIONS[id];
   if (!f) throw new Error(`Неизвестная фракция: ${id}`);
   return f;
+}
+
+// ---------- Экономика ----------
+
+export interface ResourceDef {
+  id: ResourceId;
+  name: string;
+  short: string;
+}
+
+export const RESOURCES = resourcesJson as ResourceDef[];
+export const RESOURCE_IDS = RESOURCES.map((r) => r.id);
+export const BUILDINGS: Record<string, BuildingType> = indexById(buildingsJson as BuildingType[]);
+
+export function getBuilding(id: string): BuildingType {
+  const b = BUILDINGS[id];
+  if (!b) throw new Error(`Неизвестное здание: ${id}`);
+  return b;
+}
+
+export function resourceName(id: string): string {
+  return RESOURCES.find((r) => r.id === id)?.name ?? id;
 }

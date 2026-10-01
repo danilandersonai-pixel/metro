@@ -94,7 +94,7 @@ export function createNewGame(seed: number): GameState {
     state.factions[id] = {
       id,
       resources: { ...(SCENARIO.resources[id] ?? {}) },
-      morale: 100,
+      morale: BALANCE.economy.moraleStart,
       defeated: false,
     };
   }

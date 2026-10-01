@@ -4,8 +4,8 @@ import { BALANCE, getFaction } from '../content';
 import { changeRelation, declareWar, isAtWar, isFriendly } from '../factions/relations';
 import { addMessage, newUnit, type GameState } from '../state';
 import type { Resources, Squad, Unit } from '../types';
+import { addRes } from '../economy/resources';
 import {
-  addResources,
   applyOutcomeToUnits,
   defendersAt,
   hasDefenders,
@@ -185,7 +185,7 @@ function arrive(state: GameState, squad: Squad, stationId: string, retreatId: st
   // Независимая станция с жителями.
   if (st.ownerFactionId === null && st.population > 0 && d.squads.length === 0) {
     if (opts.neutralChoice === 'negotiate') {
-      addResources(state.factions[squad.factionId].resources, negotiateCost(state, stationId), -1);
+      addRes(state.factions[squad.factionId].resources, negotiateCost(state, stationId), -1);
       placeSquad(squad, stationId);
       st.ownerFactionId = squad.factionId;
       addMessage(state, `${st.name} добровольно присоединяется к ${getFaction(squad.factionId).name}`);
@@ -278,7 +278,7 @@ export function resolveBattle(state: GameState, outcome: BattleOutcome): MoveRes
     : pending.kind === 'ambush'
       ? 'mutants'
       : (st.ownerFactionId ?? null);
-  if (winnerFaction && state.factions[winnerFaction]) addResources(state.factions[winnerFaction].resources, outcome.loot);
+  if (winnerFaction && state.factions[winnerFaction]) addRes(state.factions[winnerFaction].resources, outcome.loot);
 
   const attackerName = squad ? squad.name : 'Отряд';
   let follow: MoveResult | null = null;

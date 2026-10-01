@@ -66,8 +66,35 @@ export interface Squad {
 
 export type BuildingKind = 'economy' | 'military' | 'special';
 
+/**
+ * Эффект здания. Значение умножается на уровень здания (кроме recruit).
+ * produce — ресурс за ход; heal — доп. лечение (доля HP); defense — точность защитников;
+ * recruit — разрешает найм; risk — шанс потерь при вылазке (пост сталкеров);
+ * frontArmor — множитель урона по передней шеренге защитников (баррикада);
+ * openingStrike — урон по врагу в начале боя (пулемётное гнездо);
+ * garrisonXp — опыт гарнизону за ход; vision — дальность обзора; housing — +лимит населения;
+ * diplomacy — +отношения в ход; morale — +боевой дух в ход; armory — доступ к элитным бойцам;
+ * trade — скидка на торговлю; quests — доступ к квестам архива.
+ */
+export type BuildingEffectType =
+  | 'produce'
+  | 'heal'
+  | 'defense'
+  | 'recruit'
+  | 'risk'
+  | 'frontArmor'
+  | 'openingStrike'
+  | 'garrisonXp'
+  | 'vision'
+  | 'housing'
+  | 'diplomacy'
+  | 'morale'
+  | 'armory'
+  | 'trade'
+  | 'quests';
+
 export interface BuildingEffect {
-  type: string;
+  type: BuildingEffectType;
   value: number;
   resource?: ResourceId;
 }
@@ -76,11 +103,17 @@ export interface BuildingType {
   id: string;
   name: string;
   kind: BuildingKind;
+  description: string;
+  /** Порядок обработки в конце хода (меньше — раньше: сначала топливо и энергия). */
+  order: number;
   cost: Resources;
   buildTurns: number;
   upkeep: Resources;
   effects: BuildingEffect[];
+  /** Здания, которые должны уже стоять на станции. */
   requires: string[];
+  /** Теги станции, без которых строить нельзя. */
+  requiresTags?: StationTag[];
   maxLevel: number;
 }
 
@@ -90,6 +123,8 @@ export interface BuildingInstance {
   /** Сколько ходов осталось до конца стройки (0 — построено). */
   turnsLeft: number;
   damaged: boolean;
+  /** Идёт улучшение до этого уровня — здание пока работает на старом. */
+  upgradeTo?: number;
 }
 
 // ---------- Бойцы ----------
@@ -185,6 +220,8 @@ export interface UnitType {
   cost: Resources;
   upkeep: Resources;
   factionTags: string[];
+  /** Для найма нужна Оружейная на станции. */
+  requiresArmory?: boolean;
   levelUnlocks?: LevelUnlock[];
   /** Наёмник: не умирает насовсем, а выбывает на N ходов. */
   mercenary?: boolean;

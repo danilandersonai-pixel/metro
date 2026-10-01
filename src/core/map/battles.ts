@@ -1,9 +1,10 @@
 // Бои на глобальной карте: кто защищается, как собрать бой и как применить его итог.
 import type { CreateBattleInput, SideModifiers, SideOutcome, Side } from '../battle';
-import { getFaction } from '../content';
+import { BALANCE, getFaction } from '../content';
+import { stationEffect } from '../economy/buildings';
 import { isFriendly } from '../factions/relations';
 import type { GameState } from '../state';
-import type { Resources, Squad, TunnelPos, Unit } from '../types';
+import type { Squad, TunnelPos, Unit } from '../types';
 import { neighbors } from './graph';
 
 export interface PendingBattle {
@@ -53,10 +54,23 @@ export function hasDefenders(d: Defenders): boolean {
   return d.garrison.length > 0 || d.squads.some((s) => s.units.length > 0);
 }
 
-/** Бонусы обороны станции (растут от зданий на этапе 5). */
+/** Бонусы обороны станции: врождённый бонус + блокпост, баррикада, пулемётное гнездо. */
 export function stationDefenseModifiers(state: GameState, stationId: string): SideModifiers {
   const st = state.stations[stationId];
-  return st.defenseBonus > 0 ? { accuracyBonus: st.defenseBonus } : {};
+  const mods: SideModifiers = {};
+  const accuracy = st.defenseBonus + stationEffect(st, 'defense');
+  if (accuracy > 0) mods.accuracyBonus = accuracy;
+  const armor = stationEffect(st, 'frontArmor');
+  if (armor > 0) mods.frontDamageTakenMult = Math.max(0.2, 1 - armor);
+  const strike = stationEffect(st, 'openingStrike');
+  if (strike > 0) mods.openingStrike = { hits: BALANCE.battle.openingStrikeHits, damage: strike };
+  return mods;
+}
+
+/** Штраф точности при низком боевом духе фракции. */
+export function moraleModifier(state: GameState, factionId: string | null): number {
+  if (!factionId || !state.factions[factionId]) return 0;
+  return state.factions[factionId].morale < BALANCE.economy.lowMoraleThreshold ? -BALANCE.economy.lowMoraleAccuracyPenalty : 0;
 }
 
 function factionName(id: string | null): string {
@@ -88,6 +102,7 @@ export function buildBattleInput(state: GameState, pending: PendingBattle): Crea
     defenderFaction = d.factionIds[0] ?? null;
     defenderName = factionName(defenderFaction);
     defenderMods = stationDefenseModifiers(state, pending.targetStationId);
+    defenderMods.accuracyBonus = (defenderMods.accuracyBonus ?? 0) + moraleModifier(state, defenderFaction);
     defenderCanRetreat = !!main && retreatTargetFor(state, main) !== null;
   }
 
@@ -96,6 +111,7 @@ export function buildBattleInput(state: GameState, pending: PendingBattle): Crea
     units: squad.units,
     canRetreat: true,
     ai: squad.factionId !== player,
+    modifiers: { accuracyBonus: moraleModifier(state, squad.factionId) },
   };
   const defenderSide = {
     name: defenderName,
@@ -128,11 +144,4 @@ export function applyOutcomeToUnits(units: Unit[], side: SideOutcome): Unit[] {
   const dead = new Set(side.dead);
   const updated = new Map([...side.survivors, ...side.summonedSurvivors].map((u) => [u.uid, u]));
   return units.filter((u) => !dead.has(u.uid)).map((u) => updated.get(u.uid) ?? u);
-}
-
-export function addResources(target: Resources, add: Resources, sign = 1): void {
-  for (const [k, v] of Object.entries(add)) {
-    const key = k as keyof Resources;
-    target[key] = (target[key] ?? 0) + sign * (v ?? 0);
-  }
 }
