@@ -1,6 +1,6 @@
 // Найм бойцов и перевод между гарнизоном станции и отрядами.
 import { BALANCE, getFaction, getUnitType } from '../content';
-import { newId, newUnit, type GameState } from '../state';
+import { bumpStat, newId, newUnit, type GameState } from '../state';
 import type { Resources, Squad } from '../types';
 import { hasEffect } from './buildings';
 import { canAfford, pay } from './resources';
@@ -36,6 +36,7 @@ export function hireUnit(state: GameState, stationId: string, typeId: string, fa
   if (!check.ok) return check.reason ?? 'Нельзя';
   pay(state.factions[factionId].resources, check.cost);
   state.stations[stationId].garrison.push(newUnit(state, typeId));
+  if (factionId === state.playerFactionId) bumpStat(state, 'hired');
   return null;
 }
 

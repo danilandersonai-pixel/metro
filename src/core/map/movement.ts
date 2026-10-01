@@ -2,7 +2,7 @@
 import type { BattleOutcome, Side } from '../battle';
 import { BALANCE, getFaction } from '../content';
 import { changeRelation, declareWar, isAtWar, isFriendly } from '../factions/relations';
-import { addMessage, newUnit, queueBattle, type GameState } from '../state';
+import { addMessage, bumpStat, newUnit, queueBattle, type GameState } from '../state';
 import type { Resources, Squad, Unit } from '../types';
 import { addRes } from '../economy/resources';
 import {
@@ -255,6 +255,17 @@ export function resolveBattle(state: GameState, outcome: BattleOutcome): MoveRes
   const playerSide = pending.attackerFactionId === state.playerFactionId ? pending.attackerSide : pending.attackerSide === 1 ? 0 : null;
   if (playerSide !== null) {
     for (const lu of outcome.sides[playerSide].levelUps) addMessage(state, `${lu.name} получает уровень ${lu.level}`);
+    if (outcome.winner === playerSide) {
+      // Статистика побед для квестов: с кем был бой.
+      const enemy =
+        pending.kind !== 'station'
+          ? 'mutants'
+          : pending.attackerFactionId === state.playerFactionId
+            ? state.stations[pending.targetStationId].ownerFactionId ?? 'independent'
+            : pending.attackerFactionId;
+      bumpStat(state, 'wins');
+      bumpStat(state, `wins:${enemy}`);
+    }
   }
   const follow = resolveBattleInner(state, pending, outcome);
   // Следующий бой из очереди — только после того, как продолжение хода (возможный новый бой) обработано.

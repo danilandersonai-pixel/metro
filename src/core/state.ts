@@ -36,14 +36,36 @@ export interface GameState {
   pendingEvents: PendingEvent[];
   /** Счётчики «за ход» (например, рост отношений от торговли). Сбрасываются в конце хода. */
   turnCounters: Record<string, number>;
+  /** Постоянная статистика игрока (победы, найм, стройка) — для целей квестов. */
+  stats: Record<string, number>;
+  /** Состояние взятых квестов. */
+  quests: Record<string, QuestState>;
+  /** Наступившая концовка (игра пройдена). */
+  endingId: string | null;
   rng: Rng;
+}
+
+export interface QuestState {
+  /** active — выполняется; branching — ждёт выбора развилки; completed — выполнен. */
+  status: 'active' | 'branching' | 'completed';
+  stage: number;
+  stageStartTurn: number;
+  /** Значение счётчика статистики на начало этапа (для целей «победить N раз» и т.п.). */
+  baseline: number;
+  /** С какого хода станция удерживается без перерыва (цель hold_turns). */
+  heldSince?: number;
 }
 
 export type PendingEvent =
   | { kind: 'event'; eventId: string; stationId: string }
-  | { kind: 'peace_offer'; factionId: string };
+  | { kind: 'peace_offer'; factionId: string }
+  | { kind: 'quest_new'; questId: string }
+  | { kind: 'quest_stage'; questId: string }
+  | { kind: 'quest_done'; questId: string }
+  | { kind: 'quest_branch'; questId: string }
+  | { kind: 'ending'; endingId: string };
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 export function newId(state: GameState, prefix: string): string {
   return `${prefix}${(state.nextId++).toString(36)}`;
@@ -76,6 +98,9 @@ export function createNewGame(seed: number): GameState {
     battleQueue: [],
     pendingEvents: [],
     turnCounters: {},
+    stats: {},
+    quests: {},
+    endingId: null,
     rng: new Rng(seed),
   };
 
@@ -138,4 +163,9 @@ export function relationKey(a: string, b: string): string {
 export function queueBattle(state: GameState, battle: PendingBattle): void {
   if (!state.pendingBattle) state.pendingBattle = battle;
   else state.battleQueue.push(battle);
+}
+
+/** Увеличить счётчик статистики игрока. */
+export function bumpStat(state: GameState, key: string, n = 1): void {
+  state.stats[key] = (state.stats[key] ?? 0) + n;
 }

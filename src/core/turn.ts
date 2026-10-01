@@ -6,6 +6,7 @@ import { activeUnits } from './map/movement';
 import { processEvents } from './events';
 import { runFactionAi } from './factions/ai';
 import { processTreaties } from './factions/diplomacy';
+import { checkQuests } from './quests/quests';
 import type { GameState } from './state';
 import { maxHpOf } from './units/stats';
 
@@ -41,6 +42,8 @@ export function endTurn(state: GameState, opts: EndTurnOptions = {}): TurnReport
   state.turnCounters = {};
 
   state.turn++;
+  // Проверка квестов — последняя фаза хода
+  checkQuests(state);
   return { turn: state.turn, messages: state.messages.slice(firstMessage).map((m) => m.text) };
 }
 

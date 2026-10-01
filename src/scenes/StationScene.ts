@@ -13,6 +13,7 @@ import type { GameState } from '../core/state';
 import type { Station, Unit } from '../core/types';
 import { maxHpOf } from '../core/units/stats';
 import { requireState } from '../game/session';
+import { checkQuests } from '../core/quests/quests';
 import { Button } from '../ui/Button';
 import { drawResourceBar } from '../ui/ResourceBar';
 import { COLORS, TEXT, textStyle } from '../ui/theme';
@@ -82,7 +83,10 @@ export class StationScene extends Phaser.Scene {
 
   private showError(err: string | null): void {
     this.errorText.setText(err ?? '');
-    if (!err) this.redraw();
+    if (!err) {
+      checkQuests(this.state);
+      this.redraw();
+    }
   }
 
   // ---------------- Здания ----------------

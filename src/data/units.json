@@ -63,5 +63,9 @@
   { "id": "night_hunter", "name": "Ночной охотник", "role": "Мутант", "hp": 120, "armor": 10, "damage": 31,
     "accuracy": 0.75, "evasion": 0.15, "initiative": 17, "attackType": "melee",
     "abilities": ["leap"], "passives": [], "onHitEffect": { "id": "bleeding", "turns": 3, "chance": 0.4 },
-    "cost": {}, "upkeep": {}, "factionTags": ["mutant"] }
+    "cost": {}, "upkeep": {}, "factionTags": ["mutant"] },
+  { "id": "veteran", "name": "Ветеран-наёмник", "role": "Наёмник", "hp": 130, "armor": 22, "damage": 22,
+    "accuracy": 0.85, "evasion": 0.1, "initiative": 14, "attackType": "ranged",
+    "abilities": ["aimed_shot"], "passives": [], "mercenary": true,
+    "cost": {}, "upkeep": { "ammo": 2, "food": 1 }, "factionTags": ["human"] }
 ]

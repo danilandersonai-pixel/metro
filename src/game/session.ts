@@ -1,5 +1,6 @@
 // Текущая партия — общая для всех сцен (карта, станция, бой).
 import type { MoveResult } from '../core/map/movement';
+import { checkQuests } from '../core/quests/quests';
 import { createNewGame, type GameState } from '../core/state';
 
 export const session: {
@@ -14,7 +15,13 @@ export const session: {
 export function startNewGame(seed = Date.now() % 1_000_000_000): GameState {
   session.state = createNewGame(seed);
   session.followUp = null;
+  checkQuests(session.state);
   return session.state;
+}
+
+export function loadGame(state: GameState): void {
+  session.state = state;
+  session.followUp = null;
 }
 
 export function requireState(): GameState {

@@ -271,27 +271,60 @@ export type RelationStatus = 'war' | 'neutral' | 'peace' | 'alliance';
 export type ObjectiveType =
   | 'reach_station'
   | 'capture_station'
-  | 'defeat_squad'
+  | 'win_battles'
   | 'deliver_resource'
   | 'reach_relation'
   | 'build'
+  | 'hire'
+  | 'squad_size'
   | 'hold_turns';
+
+export interface QuestObjective {
+  type: ObjectiveType;
+  params: {
+    stationId?: string;
+    factionId?: string;
+    resource?: ResourceId;
+    amount?: number;
+    value?: number;
+    count?: number;
+    size?: number;
+    turns?: number;
+    buildingId?: string;
+  };
+}
 
 export interface QuestStage {
   text: string;
-  objective: { type: ObjectiveType; params: Record<string, unknown> };
+  objective: QuestObjective;
   onComplete: {
     setFlags?: string[];
     rewards?: Resources;
+    rewardUnits?: { type: string; level?: number }[];
     unlockStations?: string[];
   };
 }
 
+export interface QuestBranch {
+  choiceText: string;
+  nextQuestId: string;
+  setFlags: string[];
+}
+
 export interface Quest {
   id: string;
+  kind: 'tutorial' | 'story' | 'side';
   title: string;
   giverStationId: string;
-  requires: { flags: string[]; relation: Record<string, number> };
+  requires: { flags: string[]; relation: Record<string, number>; notFlags?: string[] };
   stages: QuestStage[];
-  branches?: { choiceText: string; nextQuestId: string; setFlags: string[] }[];
+  branches?: QuestBranch[];
+  /** Концовка, которая наступает после выполнения квеста. */
+  ending?: string;
+}
+
+export interface Ending {
+  id: string;
+  title: string;
+  text: string;
 }

@@ -1,6 +1,6 @@
 // Здания на станции: что построено, эффекты, стройка, ремонт, улучшение.
 import { BALANCE, getBuilding } from '../content';
-import { addMessage, type GameState } from '../state';
+import { addMessage, bumpStat, type GameState } from '../state';
 import type { BuildingEffectType, BuildingInstance, Resources, Station } from '../types';
 import { canAfford, pay, scaleRes } from './resources';
 
@@ -119,6 +119,8 @@ export function advanceConstruction(state: GameState, factionId: string): void {
           delete b.upgradeTo;
         }
         if (b.turnsLeft === 0 && factionId === state.playerFactionId) {
+          bumpStat(state, 'built');
+          bumpStat(state, `built:${b.typeId}`);
           const def = getBuilding(b.typeId);
           addMessage(state, `${st.name}: построено — ${def.name}${b.level > 1 ? ` (ур. ${b.level})` : ''}`);
         }

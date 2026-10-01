@@ -24,6 +24,8 @@ import { Dialog } from '../ui/Dialog';
 import { drawResourceBar } from '../ui/ResourceBar';
 import { applyEventChoice, canChoose, eventText, getEvent } from '../core/events';
 import { makePeace } from '../core/factions/diplomacy';
+import { activeQuests, checkQuests, chooseBranch, getEnding, getQuest, objectiveText, stageText } from '../core/quests/quests';
+import { AUTOSAVE_SLOT, MANUAL_SLOTS, saveToSlot, slotInfo } from '../game/storage';
 import { getBuilding, resourceName } from '../core/content';
 import { COLORS, TEXT, textStyle } from '../ui/theme';
 
@@ -91,6 +93,45 @@ export class MapScene extends Phaser.Scene {
     const ev = this.state.pendingEvents.shift();
     if (!ev) {
       this.checkGameOver();
+      return;
+    }
+    if (ev.kind === 'quest_new' || ev.kind === 'quest_stage') {
+      const q = getQuest(ev.questId);
+      this.addUi(
+        new Dialog(this, ev.kind === 'quest_new' ? `Новое задание: ${q.title}` : q.title, `${stageText(this.state, q.id)}\n\nЦель: ${objectiveText(this.state, q.id)}`, [
+          { label: 'Принято', onClick: () => this.processPending() },
+        ], 680),
+      );
+      return;
+    }
+    if (ev.kind === 'quest_done') {
+      const q = getQuest(ev.questId);
+      this.addUi(new Dialog(this, 'Задание выполнено', `«${q.title}» — выполнено. Награда получена.`, [{ label: 'Отлично', onClick: () => { this.redraw(); this.processPending(); } }]));
+      return;
+    }
+    if (ev.kind === 'quest_branch') {
+      const q = getQuest(ev.questId);
+      this.addUi(
+        new Dialog(this, q.title, 'Что дальше?', (q.branches ?? []).map((b, i) => ({
+          label: b.choiceText,
+          onClick: () => {
+            chooseBranch(this.state, q.id, i);
+            this.redraw();
+            this.processPending();
+          },
+        })), 760),
+      );
+      return;
+    }
+    if (ev.kind === 'ending') {
+      const e = getEnding(ev.endingId);
+      saveToSlot(AUTOSAVE_SLOT, this.state);
+      this.addUi(
+        new Dialog(this, e.title, e.text, [
+          { label: 'Играть дальше', onClick: () => this.processPending() },
+          { label: 'В главное меню', onClick: () => this.scene.start('MenuScene') },
+        ], 720),
+      );
       return;
     }
     if (ev.kind === 'event') {
@@ -204,7 +245,7 @@ export class MapScene extends Phaser.Scene {
       this.add.text(12, this.scale.height - 92, '', { ...textStyle(13, TEXT.dim), wordWrap: { width: PANEL_X - 30 }, lineSpacing: 2 }),
     );
     this.addUi(new Button(this, PANEL_X + PANEL_W / 2 + 4, this.scale.height - 36, 'Конец хода', () => this.onEndTurn(), PANEL_W - 10, 48, 20));
-    this.addUi(new Button(this, 60, 22, 'Меню', () => this.scene.start('MenuScene'), 100, 32, 15));
+    this.addUi(new Button(this, 60, 22, 'Меню', () => this.showGameMenu(), 100, 32, 15));
     this.addUi(new Button(this, PANEL_X + PANEL_W / 2 + 4, this.scale.height - 92, 'Дипломатия и торговля', () => this.scene.start('DiplomacyScene'), PANEL_W - 10, 40, 16));
   }
 
@@ -351,6 +392,15 @@ export class MapScene extends Phaser.Scene {
       line('Нажмите на свой отряд (цветной квадрат с числом бойцов), затем на подсвеченную соседнюю станцию, чтобы пойти туда.', 14, TEXT.dim);
       line('Нажмите на станцию, чтобы узнать о ней.', 14, TEXT.dim);
       line('Карту можно двигать мышью и масштабировать колесом.', 14, TEXT.dim);
+      const quests = activeQuests(this.state);
+      if (quests.length) {
+        y += 6;
+        line('Задания:', 16, TEXT.accent);
+        for (const q of quests) {
+          line(q.title, 14, TEXT.main, true);
+          line(objectiveText(this.state, q.id) || 'Ожидает выбора', 13, TEXT.dim);
+        }
+      }
       y += 8;
       line('Ваши отряды:', 16, TEXT.accent);
       for (const sq of this.state.squads.filter((s) => s.factionId === this.state.playerFactionId)) {
@@ -449,7 +499,9 @@ export class MapScene extends Phaser.Scene {
 
   private tryMove(squadId: string, stationId: string, opts: MoveOptions): void {
     const result = moveSquad(this.state, squadId, stationId, opts);
+    checkQuests(this.state);
     this.handleMoveResult(result, { squadId, stationId }, opts);
+    if (result.kind === 'moved' || result.kind === 'in_tunnel') this.processPending();
   }
 
   private handleMoveResult(result: MoveResult, move: { squadId: string; stationId: string } | null, opts: MoveOptions): void {
@@ -493,7 +545,8 @@ export class MapScene extends Phaser.Scene {
         this.showBattleDialog();
         break;
       case 'captured':
-        this.addUi(new Dialog(this, 'Станция наша', `${this.state.stations[result.stationId].name} теперь под вашим контролем.`, [{ label: 'Отлично' }]));
+        checkQuests(this.state);
+        this.addUi(new Dialog(this, 'Станция наша', `${this.state.stations[result.stationId].name} теперь под вашим контролем.`, [{ label: 'Отлично', onClick: () => this.processPending() }]));
         break;
       default:
         break;
@@ -509,6 +562,7 @@ export class MapScene extends Phaser.Scene {
       returnScene: 'MapScene',
       onFinish: (outcome: BattleOutcome) => {
         session.followUp = resolveBattle(this.state, outcome);
+        checkQuests(this.state);
         const won = outcome.winner === pending.attackerSide;
         if (!won && pending.attackerFactionId === this.state.playerFactionId) {
           session.followUp = { kind: 'invalid', reason: 'Отряд не смог прорваться и отошёл назад.' };
@@ -523,6 +577,7 @@ export class MapScene extends Phaser.Scene {
     const pending = this.state.pendingBattle;
     if (!pending) return;
     const { outcome, follow } = autoResolvePending(this.state);
+    checkQuests(this.state);
     // Сторона игрока: нападающий — если игрок напал, иначе защитник.
     const playerSide = pending.attackerFactionId === this.state.playerFactionId ? pending.attackerSide : ((1 - pending.attackerSide) as 0 | 1);
     const won = outcome.winner === playerSide;
@@ -554,6 +609,7 @@ export class MapScene extends Phaser.Scene {
       return;
     }
     const report = endTurn(this.state);
+    saveToSlot(AUTOSAVE_SLOT, this.state);
     this.selection = { kind: 'none' };
     this.redraw();
     if (report.messages.length) {
@@ -561,6 +617,36 @@ export class MapScene extends Phaser.Scene {
     } else {
       this.processPending();
     }
+  }
+
+  private showGameMenu(): void {
+    this.addUi(
+      new Dialog(this, 'Меню', 'Игра автоматически сохраняется в конце каждого хода.', [
+        { label: 'Задания', onClick: () => this.scene.start('QuestDialogScene') },
+        { label: 'Сохранить', onClick: () => this.showSaveSlots() },
+        { label: 'Выйти в меню', onClick: () => this.scene.start('MenuScene') },
+        { label: 'Назад' },
+      ], 680),
+    );
+  }
+
+  private showSaveSlots(): void {
+    const describe = (slot: string) => {
+      const info = slotInfo(slot);
+      return info ? `Слот ${slot}: ход ${info.turn}` : `Слот ${slot}: пусто`;
+    };
+    this.addUi(
+      new Dialog(this, 'Сохранить игру', 'Выберите слот. Старое сохранение в нём будет заменено.', [
+        ...MANUAL_SLOTS.map((slot) => ({
+          label: describe(slot),
+          onClick: () => {
+            const ok = saveToSlot(slot, this.state);
+            this.addUi(new Dialog(this, ok ? 'Сохранено' : 'Ошибка', ok ? `Игра сохранена в слот ${slot}.` : 'Не удалось сохранить (хранилище браузера недоступно).', [{ label: 'Хорошо' }]));
+          },
+        })),
+        { label: 'Отмена' },
+      ], 720),
+    );
   }
 
   private checkGameOver(): void {

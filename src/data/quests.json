@@ -1,0 +1,125 @@
+{
+  "quests": [
+    {
+      "id": "tut_move", "kind": "tutorial", "title": "Первый выход", "giverStationId": "sokolniki",
+      "requires": { "flags": [], "relation": {} },
+      "stages": [
+        { "text": "Староста Сокольников хлопает вас по плечу: «Соседи с Преображенки давно не выходили на связь. Сходи, глянь, живы ли». Выберите отряд на карте и нажмите на соседнюю станцию. Отряд тратит очки движения на каждый тоннель.",
+          "objective": { "type": "reach_station", "params": { "stationId": "preobrazhenskaya_ploshchad" } },
+          "onComplete": { "setFlags": ["tut_move_done"], "rewards": { "ammo": 30 } } }
+      ]
+    },
+    {
+      "id": "tut_squad", "kind": "tutorial", "title": "Свои люди", "giverStationId": "sokolniki",
+      "requires": { "flags": ["tut_move_done"], "relation": {} },
+      "stages": [
+        { "text": "«Впятером в тоннели не ходят», — ворчит староста. Наймите бойца на Вербовочном пункте (экран станции) и переведите его в отряд, чтобы в отряде было 6 человек.",
+          "objective": { "type": "squad_size", "params": { "size": 6 } },
+          "onComplete": { "setFlags": ["tut_squad_done"], "rewards": { "food": 20 } } }
+      ]
+    },
+    {
+      "id": "tut_fight", "kind": "tutorial", "title": "Первая кровь", "giverStationId": "sokolniki",
+      "requires": { "flags": ["tut_squad_done"], "relation": {} },
+      "stages": [
+        { "text": "Со стороны Черкизовской всё громче скребутся. Победите мутантов в бою — в тоннеле, при набеге или в их логове. В бою ближники бьют только переднюю шеренгу врага, стрелки — кого угодно.",
+          "objective": { "type": "win_battles", "params": { "count": 1, "factionId": "mutants" } },
+          "onComplete": { "setFlags": ["tut_fight_done"], "rewards": { "meds": 5, "ammo": 20 } } }
+      ]
+    },
+    {
+      "id": "tut_build", "kind": "tutorial", "title": "Хозяйство", "giverStationId": "sokolniki",
+      "requires": { "flags": ["tut_fight_done"], "relation": {} },
+      "stages": [
+        { "text": "Патроны сами не родятся. Постройте на своей станции любое новое здание или улучшите старое — ферму, склад, мастерскую. Стройка идёт несколько ходов.",
+          "objective": { "type": "build", "params": { "count": 1 } },
+          "onComplete": { "setFlags": ["tutorial_done"], "rewards": { "scrap": 20, "ammo": 30 } } }
+      ]
+    },
+    {
+      "id": "story_noise", "kind": "story", "title": "Радиошум", "giverStationId": "sokolniki",
+      "requires": { "flags": ["tutorial_done"], "relation": {} },
+      "stages": [
+        { "text": "Связист Гоша третью ночь не спит: в приёмнике сквозь треск повторяется одна и та же морзянка — «вода… юг… помогите». Сигнал идёт откуда-то с Кропоткинской, куда двадцать лет никто не ходил. Доберитесь до Чистых прудов — оттуда, говорят, слышно лучше.",
+          "objective": { "type": "reach_station", "params": { "stationId": "chistye_prudy" } },
+          "onComplete": { "setFlags": ["noise_heard"], "rewards": { "ammo": 40 } } }
+      ],
+      "branches": [
+        { "choiceText": "Договориться с Торговым союзом о проходе", "nextQuestId": "story_trade", "setFlags": ["path_trade"] },
+        { "choiceText": "Пробить дорогу силой через Коммуну", "nextQuestId": "story_force", "setFlags": ["path_force"] }
+      ]
+    },
+    {
+      "id": "story_trade", "kind": "story", "title": "Цена прохода", "giverStationId": "komsomolskaya",
+      "requires": { "flags": ["path_trade"], "relation": {} },
+      "stages": [
+        { "text": "Купцы Кольца держат южные тоннели и пропускают только своих. «Станешь другом союза — пройдёшь», — говорит приказчик. Доведите отношения с Торговым союзом Кольца до +30: дарите, торгуйте, заключите договор.",
+          "objective": { "type": "reach_relation", "params": { "factionId": "ring_trade_union", "value": 30 } },
+          "onComplete": { "setFlags": ["south_open"], "rewards": { "ammo": 60 },
+            "rewardUnits": [{ "type": "veteran", "level": 4 }] } }
+      ]
+    },
+    {
+      "id": "story_force", "kind": "story", "title": "Красный кордон", "giverStationId": "sokolniki",
+      "requires": { "flags": ["path_force"], "relation": {} },
+      "stages": [
+        { "text": "Коммуна перекрыла линию и стреляет в каждого, кто идёт на юг. Значит, будем говорить на их языке. Захватите Красносельскую.",
+          "objective": { "type": "capture_station", "params": { "stationId": "krasnoselskaya" } },
+          "onComplete": { "setFlags": ["south_open"], "rewards": { "ammo": 80, "food": 30 },
+            "rewardUnits": [{ "type": "veteran", "level": 4 }] } }
+      ]
+    },
+    {
+      "id": "story_lair", "kind": "story", "title": "Гнездо у Библиотеки", "giverStationId": "sokolniki",
+      "requires": { "flags": ["south_open"], "relation": {} },
+      "stages": [
+        { "text": "Путь на юг открыт, но у Библиотеки имени Ленина гнездо: оттуда лезут плевальщики и ползуны. Пока оно цело, на Кропоткинскую не пройти. Выжгите логово — захватите станцию.",
+          "objective": { "type": "capture_station", "params": { "stationId": "biblioteka_lenina" } },
+          "onComplete": { "setFlags": ["lair_cleared"], "rewards": { "scrap": 30, "meds": 6 },
+            "unlockStations": ["kropotkinskaya"] } }
+      ]
+    },
+    {
+      "id": "story_voice", "kind": "story", "title": "Голос с юга", "giverStationId": "sokolniki",
+      "requires": { "flags": ["lair_cleared"], "relation": {} },
+      "stages": [
+        { "text": "Тоннель к Кропоткинской длинный, сырой и пахнет ржавчиной. Сигнал теперь слышен без приёмника — его выстукивает по трубам старый автомат. Дойдите до Кропоткинской.",
+          "objective": { "type": "reach_station", "params": { "stationId": "kropotkinskaya" } },
+          "onComplete": { "setFlags": ["pumps_found"], "rewards": { "ammo": 50 } } }
+      ],
+      "branches": [
+        { "choiceText": "Чинить насосы вместе со всеми — вода общая", "nextQuestId": "story_council", "setFlags": ["choice_share"] },
+        { "choiceText": "Взять насосную себе — кто держит воду, тот держит линию", "nextQuestId": "story_hold", "setFlags": ["choice_seize"] }
+      ]
+    },
+    {
+      "id": "story_council", "kind": "story", "title": "Общий совет", "giverStationId": "kropotkinskaya",
+      "requires": { "flags": ["choice_share"], "relation": {} },
+      "stages": [
+        { "text": "Под Кропоткинской — насосная станция. Последние смотрители едва держат её на ходу; если насосы встанут, южные тоннели затопит, а за ними и всю линию. Одним не справиться: нужны запчасти и люди. Соберите для ремонта 60 хлама — он будет передан автоматически, когда наберётся.",
+          "objective": { "type": "deliver_resource", "params": { "resource": "scrap", "amount": 60 } },
+          "onComplete": { "setFlags": ["pumps_repaired"], "rewards": { "ammo": 100 } } },
+        { "text": "Насосы гудят ровно. Теперь нужно, чтобы все станции линии договорились беречь их вместе. Доведите отношения с Торговым союзом Кольца до +50 — их слово весит больше всех.",
+          "objective": { "type": "reach_relation", "params": { "factionId": "ring_trade_union", "value": 50 } },
+          "onComplete": { "setFlags": ["ending_light"] } }
+      ],
+      "ending": "ending_light"
+    },
+    {
+      "id": "story_hold", "kind": "story", "title": "Железная рука", "giverStationId": "kropotkinskaya",
+      "requires": { "flags": ["choice_seize"], "relation": {} },
+      "stages": [
+        { "text": "Насосная ваша. Остальные скоро поймут, что значит жить ниже вас по течению, — и придут её отбивать. Захватите Кропоткинскую, если она ещё не ваша, и удержите её 6 ходов.",
+          "objective": { "type": "hold_turns", "params": { "stationId": "kropotkinskaya", "turns": 6 } },
+          "onComplete": { "setFlags": ["ending_iron"] } }
+      ],
+      "ending": "ending_iron"
+    }
+  ],
+  "endings": [
+    { "id": "ending_light", "title": "Общая вода",
+      "text": "Насосы на Кропоткинской больше не останавливаются: смены смотрителей присылают все станции линии по очереди. Тоннели не затопило. Старые обиды никуда не делись, но впервые за двадцать лет на сходе за одним столом сидят и община, и купцы, и даже хмурые люди из Коммуны. Гоша наконец выспался.\n\nКонец: «Общая вода»." },
+    { "id": "ending_iron", "title": "Железная рука",
+      "text": "Кропоткинская устояла. Теперь каждая станция линии знает: если Сокольники захотят, воды не будет ни у кого. Дань приходит исправно, караваны кланяются на блокпостах. Вы сильнее всех в этих тоннелях — и почти все вас ненавидят. Но у вас есть вода.\n\nКонец: «Железная рука»." }
+  ]
+}
