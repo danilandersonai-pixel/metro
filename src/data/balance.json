@@ -7,6 +7,8 @@
   "battle": {
     "rows": 2,
     "slotsPerRow": 3,
+    "slotsPerRowLarge": 6,
+    "maxRounds": 40,
     "defendDamageMultiplier": 0.5,
     "hitChanceMin": 0.05,
     "hitChanceMax": 0.95,
@@ -15,7 +17,32 @@
     "armorConstant": 50,
     "critChance": 0.1,
     "critMultiplier": 1.5,
-    "retreatFromRound": 2
+    "minDamage": 1,
+    "supportAttackMultiplier": 0.5,
+    "retreatFromRound": 2,
+    "retreatDamageChance": 0.5,
+    "retreatDamageFraction": 0.15,
+    "mercenaryDownedTurns": 3
+  },
+  "battleAi": {
+    "healThreshold": 0.4,
+    "priorityTargetBonus": 0.25,
+    "priorityAttackTypes": ["ranged", "support"]
+  },
+  "unitGrowth": {
+    "hpPerLevel": 0.08,
+    "damagePerLevel": 0.06,
+    "armorPerLevel": 1,
+    "accuracyPerLevel": 0.005,
+    "initiativePerLevel": 0.2
+  },
+  "loot": {
+    "ammoPerKill": 6,
+    "ammoPerKillLevel": 2,
+    "medsChance": 0.25,
+    "medsAmount": 2,
+    "scrapChance": 0.35,
+    "scrapAmount": 3
   },
   "experience": {
     "maxLevel": 20,

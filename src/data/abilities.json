@@ -1,0 +1,22 @@
+[
+  { "id": "stun_blow", "name": "Оглушающий удар", "kind": "active", "target": "enemy", "reach": "melee",
+    "damageMult": 0.8, "effect": { "id": "stunned", "turns": 1, "chance": 0.5 }, "cooldown": 3 },
+  { "id": "aimed_shot", "name": "Прицельный выстрел", "kind": "active", "target": "enemy", "reach": "ranged",
+    "damageMult": 1.6, "accuracyBonus": 0.15, "cooldown": 2 },
+  { "id": "suppressive_fire", "name": "Огонь на подавление", "kind": "active", "target": "enemy_row", "reach": "ranged",
+    "damageMult": 0.5, "effect": { "id": "suppressed", "turns": 2, "chance": 0.8 }, "cooldown": 3 },
+  { "id": "fire_wave", "name": "Огненный вал", "kind": "active", "target": "enemy_row", "reach": "ranged",
+    "damageMult": 1.0, "effect": { "id": "burning", "turns": 2, "chance": 0.7 }, "cooldown": 3 },
+  { "id": "grenade", "name": "Граната", "kind": "active", "target": "enemy_row", "reach": "ranged",
+    "damageMult": 1.2, "cooldown": 3 },
+  { "id": "stim", "name": "Стимулятор", "kind": "active", "target": "ally",
+    "heal": 10, "effect": { "id": "inspired", "turns": 2, "chance": 1 }, "cooldown": 3 },
+  { "id": "deploy_cover", "name": "Поставить укрытие", "kind": "active", "target": "ally",
+    "effect": { "id": "covered", "turns": 2, "chance": 1 }, "cooldown": 2 },
+  { "id": "rally", "name": "Сплотить", "kind": "active", "target": "all_allies",
+    "effect": { "id": "inspired", "turns": 2, "chance": 1 }, "cooldown": 4 },
+  { "id": "leap", "name": "Прыжок из темноты", "kind": "active", "target": "enemy", "reach": "ranged",
+    "damageMult": 1.1, "effect": { "id": "bleeding", "turns": 3, "chance": 0.6 }, "cooldown": 3 },
+  { "id": "command_aura", "name": "Командирская аура", "kind": "passive", "auraAccuracy": 0.05 },
+  { "id": "regeneration", "name": "Регенерация", "kind": "passive", "regen": 5 }
+]

@@ -110,6 +110,52 @@ export interface Effect {
   stacks: number;
 }
 
+/** Описание эффекта из effects.json. */
+export interface EffectDef {
+  id: EffectId;
+  name: string;
+  positive: boolean;
+  maxStacks: number;
+  /** Урон за стак в начале хода носителя (без учёта брони). */
+  tickDamage?: number;
+  /** Пропуск хода (оглушение). */
+  skipTurn?: boolean;
+  /** Добавка к точности (доля, например -0.25). */
+  accuracy?: number;
+  /** Множитель наносимого урона. */
+  damageMult?: number;
+  /** Множитель получаемого урона. */
+  damageTakenMult?: number;
+}
+
+/** Наложение эффекта атакой или способностью. */
+export interface EffectApplication {
+  id: EffectId;
+  turns: number;
+  chance: number;
+}
+
+export type AbilityTarget = 'enemy' | 'enemy_row' | 'all_enemies' | 'ally' | 'all_allies' | 'self';
+
+/** Способность или пассивка из abilities.json. */
+export interface AbilityDef {
+  id: string;
+  name: string;
+  kind: 'active' | 'passive';
+  target?: AbilityTarget;
+  /** Для одиночной атаки: melee — по правилам ближнего боя, ranged — по любому. */
+  reach?: 'melee' | 'ranged';
+  damageMult?: number;
+  accuracyBonus?: number;
+  heal?: number;
+  effect?: EffectApplication;
+  cooldown?: number;
+  /** Пассивка: добавка к точности всем союзникам, пока носитель жив. */
+  auraAccuracy?: number;
+  /** Пассивка: восстановление HP в начале своего хода. */
+  regen?: number;
+}
+
 export interface LevelUnlock {
   level: number;
   abilityId?: string;
@@ -124,8 +170,13 @@ export interface UnitType {
   armor: number;
   damage: number;
   accuracy: number;
+  evasion: number;
   initiative: number;
   attackType: AttackType;
+  /** Сила лечения (только для support). */
+  heal?: number;
+  /** Эффект, который может наложить обычная атака. */
+  onHitEffect?: EffectApplication;
   abilities: string[];
   passives: string[];
   cost: Resources;
@@ -152,6 +203,8 @@ export interface Unit {
   hp: number;
   effects: Effect[];
   position: UnitPosition;
+  /** Наёмник выбыл из строя на столько ходов (0/нет — в строю). */
+  downedTurns?: number;
 }
 
 // ---------- Фракции ----------

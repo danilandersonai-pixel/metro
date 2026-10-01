@@ -1,0 +1,9 @@
+[
+  { "id": "bleeding", "name": "Кровотечение", "positive": false, "maxStacks": 3, "tickDamage": 4 },
+  { "id": "burning", "name": "Горение", "positive": false, "maxStacks": 2, "tickDamage": 6 },
+  { "id": "poisoned", "name": "Отравление", "positive": false, "maxStacks": 3, "tickDamage": 3, "accuracy": -0.05 },
+  { "id": "stunned", "name": "Оглушение", "positive": false, "maxStacks": 1, "skipTurn": true },
+  { "id": "inspired", "name": "Воодушевление", "positive": true, "maxStacks": 1, "damageMult": 1.25, "accuracy": 0.1 },
+  { "id": "covered", "name": "Укрытие", "positive": true, "maxStacks": 1, "damageTakenMult": 0.6 },
+  { "id": "suppressed", "name": "Подавление", "positive": false, "maxStacks": 1, "accuracy": -0.25 }
+]
