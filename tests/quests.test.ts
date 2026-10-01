@@ -162,7 +162,8 @@ describe('сохранения', () => {
     endTurn(s, QUIET);
     const json = serialize(s);
     const loaded = deserialize(json);
-    expect(serialize(loaded)).toBe(json.replace(/"savedAt":"[^"]+"/, `"savedAt":"${JSON.parse(serialize(loaded)).savedAt}"`));
+    // Сравниваем данные партии (время сохранения, понятно, разное).
+    expect(JSON.parse(serialize(loaded)).data).toEqual(JSON.parse(json).data);
     expect(loaded.rng.next()).toBe(s.rng.next());
     expect(loaded.version).toBe(SAVE_VERSION);
   });
